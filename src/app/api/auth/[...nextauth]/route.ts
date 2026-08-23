@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
+import GitHubProvider from 'next-auth/providers/github';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
 // In-memory user store (demo)
@@ -19,6 +20,10 @@ const handler = NextAuth({
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
+    }),
+    GitHubProvider({
+      clientId: process.env.GITHUB_CLIENT_ID ?? '',
+      clientSecret: process.env.GITHUB_CLIENT_SECRET ?? '',
     }),
     CredentialsProvider({
       name: 'Email',
@@ -71,6 +76,19 @@ const handler = NextAuth({
     strategy: 'jwt',
   },
   callbacks: {
+    async signIn({ user }) {
+      // Auto-register OAuth users (Google, GitHub) into in-memory store
+      if (user?.email && !users[user.email]) {
+        users[user.email] = {
+          id: user.id ?? String(Object.keys(users).length + 1),
+          name: user.name ?? user.email.split('@')[0],
+          email: user.email,
+          password: '',
+          role: 'pembeli',
+        };
+      }
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
