@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import Providers from '@/components/Providers';
 
 export const metadata: Metadata = {
   title: 'KomoditasSumut - Marketplace Komoditas Bumi Sumatera Utara',
@@ -23,9 +24,11 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body>
-        <Navbar />
-        <main className="min-h-screen">{children}</main>
-        <Footer />
+        <Providers>
+          <Navbar />
+          <main className="min-h-screen">{children}</main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );

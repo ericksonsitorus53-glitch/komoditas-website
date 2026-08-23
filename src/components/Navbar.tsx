@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Menu, X, Search, ShoppingCart, User, ChevronDown, MapPin, Bell } from 'lucide-react';
+import { useSession, signOut } from 'next-auth/react';
+import { Menu, X, Search, ShoppingCart, User, ChevronDown, MapPin, Bell, LogOut, Settings, LayoutDashboard } from 'lucide-react';
 
 const navLinks = [
   { href: '/', label: 'Beranda' },
@@ -16,6 +17,8 @@ const navLinks = [
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const { data: session } = useSession();
 
   return (
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100 shadow-sm">
@@ -49,13 +52,82 @@ export default function Navbar() {
 
           {/* Right Actions - Desktop */}
           <div className="hidden lg:flex items-center gap-3">
-            <Link href="/login" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-all">
-              <User className="w-4 h-4" />
-              Masuk
-            </Link>
-            <Link href="/register" className="btn-primary text-sm py-2.5 px-5">
-              Daftar Gratis
-            </Link>
+            {session ? (
+              /* Logged In - User Menu */
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-50 transition-all"
+                >
+                  {session.user?.image ? (
+                    <img
+                      src={session.user.image}
+                      alt="Profile"
+                      className="w-8 h-8 rounded-full border-2 border-primary-200"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                      {session.user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                    </div>
+                  )}
+                  <span className="text-sm font-medium text-gray-700 max-w-[100px] truncate">
+                    {session.user?.name || 'User'}
+                  </span>
+                  <ChevronDown className="w-4 h-4 text-gray-400" />
+                </button>
+
+                {/* Dropdown Menu */}
+                {showUserMenu && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <p className="text-sm font-medium text-gray-900 truncate">{session.user?.name}</p>
+                        <p className="text-xs text-gray-500 truncate">{session.user?.email}</p>
+                      </div>
+                      <Link
+                        href="/dashboard"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <LayoutDashboard className="w-4 h-4" />
+                        Dashboard
+                      </Link>
+                      <Link
+                        href="/profil"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <Settings className="w-4 h-4" />
+                        Pengaturan
+                      </Link>
+                      <hr className="my-2 border-gray-100" />
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          signOut({ callbackUrl: '/' });
+                        }}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors w-full"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Keluar
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              /* Not Logged In - Auth Buttons */
+              <>
+                <Link href="/login" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-all">
+                  <User className="w-4 h-4" />
+                  Masuk
+                </Link>
+                <Link href="/register" className="btn-primary text-sm py-2.5 px-5">
+                  Daftar Gratis
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -106,12 +178,48 @@ export default function Navbar() {
               </Link>
             ))}
             <div className="pt-3 border-t border-gray-100 flex flex-col gap-2">
-              <Link href="/login" className="btn-secondary text-sm text-center" onClick={() => setIsOpen(false)}>
-                Masuk
-              </Link>
-              <Link href="/register" className="btn-primary text-sm text-center" onClick={() => setIsOpen(false)}>
-                Daftar Gratis
-              </Link>
+              {session ? (
+                <>
+                  <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl">
+                    {session.user?.image ? (
+                      <img
+                        src={session.user.image}
+                        alt="Profile"
+                        className="w-10 h-10 rounded-full border-2 border-primary-200"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center text-white font-bold">
+                        {session.user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{session.user?.name}</p>
+                      <p className="text-xs text-gray-500">{session.user?.email}</p>
+                    </div>
+                  </div>
+                  <Link href="/dashboard" className="btn-secondary text-sm text-center" onClick={() => setIsOpen(false)}>
+                    <LayoutDashboard className="w-4 h-4 mr-2" /> Dashboard
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setIsOpen(false);
+                      signOut({ callbackUrl: '/' });
+                    }}
+                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-all"
+                  >
+                    <LogOut className="w-4 h-4" /> Keluar
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" className="btn-secondary text-sm text-center" onClick={() => setIsOpen(false)}>
+                    Masuk
+                  </Link>
+                  <Link href="/register" className="btn-primary text-sm text-center" onClick={() => setIsOpen(false)}>
+                    Daftar Gratis
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

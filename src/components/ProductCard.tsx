@@ -1,6 +1,11 @@
+'use client';
+
 import Link from 'next/link';
+import Image from 'next/image';
+import { useState } from 'react';
 import { Star, MapPin, ShoppingCart, Leaf, TrendingUp } from 'lucide-react';
 import type { Product } from '@/lib/data';
+import ProductCardSkeleton from './ProductCardSkeleton';
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat('id-ID', {
@@ -10,15 +15,49 @@ function formatPrice(price: number): string {
   }).format(price);
 }
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({
+  product,
+  blurDataURL,
+}: {
+  product: Product;
+  blurDataURL?: string;
+}) {
+  const [isLoading, setIsLoading] = useState(true);
+
+  if (isLoading) {
+    return (
+      <div className="relative">
+        <ProductCardSkeleton />
+        <div className="absolute inset-0">
+          <Link href={`/produk/${product.slug}`} className="block w-full h-full">
+            <Image
+              src={product.image}
+              alt={product.name}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              placeholder="blur"
+              blurDataURL={blurDataURL}
+              className="object-cover opacity-0"
+              onLoadingComplete={() => setIsLoading(false)}
+            />
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Link href={`/produk/${product.slug}`} className="card group cursor-pointer">
       {/* Image */}
       <div className="relative overflow-hidden aspect-[4/3]">
-        <img
+        <Image
           src={product.image}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          placeholder="blur"
+          blurDataURL={blurDataURL}
+          className="object-cover group-hover:scale-110 transition-transform duration-500"
         />
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-wrap gap-2">

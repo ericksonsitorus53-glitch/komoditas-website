@@ -1,7 +1,10 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Star, MapPin, ShoppingCart, Heart, Share2, ChevronRight, Store, Shield, Truck, RotateCcw, Leaf, Minus, Plus } from 'lucide-react';
 import { products } from '@/lib/data';
 import ProductCard from '@/components/ProductCard';
+import ProductImage from '@/components/ProductImage';
+import { getProductBlurData } from '@/lib/blur-images';
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat('id-ID', {
@@ -18,6 +21,8 @@ export function generateStaticParams() {
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const product = products.find(p => p.slug === slug);
+  const blurData = await getProductBlurData();
+  const blurDataURL = blurData.find(b => b.slug === slug)?.blurDataURL;
 
   if (!product) {
     return (
@@ -32,6 +37,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   }
 
   const relatedProducts = products.filter(p => p.categorySlug === product.categorySlug && p.id !== product.id).slice(0, 3);
+
+  const getRelatedBlur = (productSlug: string) =>
+    blurData.find(b => b.slug === productSlug)?.blurDataURL;
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -54,15 +62,20 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         <div className="grid lg:grid-cols-5 gap-8">
           {/* Image */}
           <div className="lg:col-span-3">
-            <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
-              <div className="relative aspect-[4/3]">
-                <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-                <div className="absolute top-4 left-4 flex gap-2">
-                  {product.isFeatured && <span className="badge bg-primary-500 text-white shadow-lg">🔥 Populer</span>}
-                  {product.isOrganic && <span className="badge bg-green-500 text-white shadow-lg">🌱 Organik</span>}
-                </div>
+          <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+            <div className="relative">
+              <ProductImage
+                src={product.image}
+                alt={product.name}
+                blurDataURL={blurDataURL}
+                priority
+              />
+              <div className="absolute top-4 left-4 flex gap-2 z-10">
+                {product.isFeatured && <span className="badge bg-primary-500 text-white shadow-lg">🔥 Populer</span>}
+                {product.isOrganic && <span className="badge bg-green-500 text-white shadow-lg">🌱 Organik</span>}
               </div>
             </div>
+          </div>
 
             {/* Description */}
             <div className="bg-white rounded-2xl p-6 mt-6 shadow-sm border border-gray-100">
@@ -193,7 +206,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             <h2 className="section-title text-xl mb-6">Produk Sejenis</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {relatedProducts.map(p => (
-                <ProductCard key={p.id} product={p} />
+                <ProductCard
+                  key={p.id}
+                  product={p}
+                  blurDataURL={getRelatedBlur(p.slug)}
+                />
               ))}
             </div>
           </div>
