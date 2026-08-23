@@ -1,18 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
-import { Mail, Lock, Eye, EyeOff, LogIn, AlertCircle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, LogIn, AlertCircle, Info } from 'lucide-react';
 
-export default function LoginPage() {
+const ERROR_MESSAGES: Record<string, string> = {
+  AccessDenied: 'Akses Google ditolak. Kemungkinan akun Google Anda belum terdaftar sebagai test user di Google Cloud Console. Silakan gunakan email & password untuk masuk.',
+  OAuthAccountNotLinked: 'Email Google ini sudah terdaftar dengan metode lain. Silakan masuk menggunakan email & password.',
+  OAuthCallback: 'Gagal terhubung ke Google. Pastikan akun Google kamu sudah ditambahkan sebagai test user. Silakan coba lagi atau gunakan email & password.',
+  Configuration: 'Konfigurasi Google login belum aktif. Silakan masuk menggunakan email & password.',
+  default: 'Terjadi kesalahan saat login dengan Google. Silakan gunakan email & password untuk masuk.',
+};
+
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const authError = searchParams.get('error');
+    if (authError) {
+      setError(ERROR_MESSAGES[authError] || ERROR_MESSAGES.default);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,7 +74,19 @@ export default function LoginPage() {
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-sm text-red-700">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
-              {error}
+              <span>{error}</span>
+            </div>
+          )}
+          {error && (
+            <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2 text-sm text-amber-700">
+              <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium mb-1">Tips:</p>
+                <ul className="list-disc list-inside space-y-0.5 text-amber-600">
+                  <li>Gunakan <strong>email</strong> dan <strong>password</strong> di atas</li>
+                  <li>Akun baru otomatis terdaftar saat login pertama kali</li>
+                </ul>
+              </div>
             </div>
           )}
 
@@ -156,5 +184,17 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full"></div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
