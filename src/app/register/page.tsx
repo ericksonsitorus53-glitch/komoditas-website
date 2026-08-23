@@ -2,11 +2,58 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Mail, Lock, Eye, EyeOff, UserPlus, User, Phone } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
+import { Mail, Lock, Eye, EyeOff, UserPlus, User, Phone, AlertCircle } from 'lucide-react';
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState('pembeli');
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [location, setLocation] = useState('');
+  const [agreed, setAgreed] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (!agreed) {
+      setError('Anda harus menyetujui Syarat & Ketentuan.');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password minimal 6 karakter.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError('Gagal mendaftar. Silakan coba lagi.');
+      } else {
+        router.push('/');
+        router.refresh();
+      }
+    } catch {
+      setError('Terjadi kesalahan. Silakan coba lagi.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
@@ -24,6 +71,13 @@ export default function RegisterPage() {
 
         {/* Form */}
         <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-sm text-red-700">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              {error}
+            </div>
+          )}
+
           {/* Role Selection */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-3">Saya ingin menjadi:</label>
@@ -35,6 +89,7 @@ export default function RegisterPage() {
               ].map(opt => (
                 <button
                   key={opt.value}
+                  type="button"
                   onClick={() => setRole(opt.value)}
                   className={`p-3 rounded-xl border-2 text-center transition-all ${
                     role === opt.value
@@ -49,20 +104,33 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <form className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
                 <div className="relative">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input type="text" placeholder="John Doe" className="input-field pl-12" />
+                  <input
+                    type="text"
+                    placeholder="John Doe"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    className="input-field pl-12"
+                  />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">No. HP</label>
                 <div className="relative">
                   <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input type="tel" placeholder="0812-xxxx-xxxx" className="input-field pl-12" />
+                  <input
+                    type="tel"
+                    placeholder="0812-xxxx-xxxx"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="input-field pl-12"
+                  />
                 </div>
               </div>
             </div>
@@ -71,7 +139,14 @@ export default function RegisterPage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input type="email" placeholder="nama@email.com" className="input-field pl-12" />
+                <input
+                  type="email"
+                  placeholder="nama@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="input-field pl-12"
+                />
               </div>
             </div>
 
@@ -81,7 +156,11 @@ export default function RegisterPage() {
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Minimal 8 karakter"
+                  placeholder="Minimal 6 karakter"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
                   className="input-field pl-12 pr-12"
                 />
                 <button
@@ -96,7 +175,11 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Lokasi</label>
-              <select className="input-field cursor-pointer">
+              <select
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="input-field cursor-pointer"
+              >
                 <option value="">Pilih Kabupaten/Kota</option>
                 <option>Medan</option>
                 <option>Deli Serdang</option>
@@ -112,15 +195,36 @@ export default function RegisterPage() {
             </div>
 
             <label className="flex items-start gap-3 cursor-pointer">
-              <input type="checkbox" className="w-4 h-4 mt-0.5 text-primary-600 rounded focus:ring-primary-500" />
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                className="w-4 h-4 mt-0.5 text-primary-600 rounded focus:ring-primary-500"
+              />
               <span className="text-sm text-gray-600">
                 Saya menyetujui <Link href="/syarat" className="text-primary-600 hover:text-primary-700">Syarat & Ketentuan</Link> dan{' '}
                 <Link href="/privasi" className="text-primary-600 hover:text-primary-700">Kebijakan Privasi</Link>
               </span>
             </label>
 
-            <button type="submit" className="btn-primary w-full py-3">
-              <UserPlus className="w-5 h-5 mr-2" /> Daftar Sekarang
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary w-full py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Mendaftar...
+                </span>
+              ) : (
+                <span className="flex items-center justify-center gap-2">
+                  <UserPlus className="w-5 h-5" /> Daftar Sekarang
+                </span>
+              )}
             </button>
           </form>
         </div>
