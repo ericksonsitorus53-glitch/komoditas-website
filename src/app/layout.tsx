@@ -71,7 +71,10 @@ export const metadata: Metadata = {
     canonical: siteUrl,
   },
   verification: {
-    google: 'your-google-verification-code',
+    google: 'google-site-verification-placeholder',
+    other: {
+      'msvalidate.01': 'bing-webmaster-placeholder',
+    },
   },
 };
 
