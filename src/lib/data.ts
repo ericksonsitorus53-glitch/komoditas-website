@@ -216,7 +216,7 @@ export const products: Product[] = [
     description: 'Kepiting batu hidup segar dari perairan laut Selat Malaka, Sumatera Utara. Kepiting berukuran besar dengan daging tebal dan manis. Dikemas khusus dalam kondisi hidup untuk menjaga kesegaran hingga sampai ke tangan Anda. Cocok untuk masakan seafood favorit.',
     price: 175000, unit: '1 kg', category: 'Ikan & Perikanan', categorySlug: 'ikan-perikanan',
     origin: 'Batubara', seller: 'Laut Segar Sumut', sellerId: '11',
-    image: 'https://images.unsplash.com/photo-1559737558-2f5a35f4523b?w=600&h=400&fit=crop',
+    image: 'https://images.unsplash.com/photo-1746964245797-651bcfebc9bf?w=600&h=400&fit=crop',
     rating: 0, reviews: 0, sold: 0, stock: 40, isFeatured: true, isOrganic: false,
     tags: ['kepiting', 'batu', 'hidup', 'laut', 'seafood']
   },
