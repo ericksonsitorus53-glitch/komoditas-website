@@ -2,24 +2,20 @@ import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import GitHubProvider from 'next-auth/providers/github';
 import CredentialsProvider from 'next-auth/providers/credentials';
-
-// In-memory user store (demo)
-const users: Record<string, { id: string; name: string; email: string; password: string; role: string }> = {};
-
-// Pre-seed demo user
-users['demo@komoditas.com'] = {
-  id: '1',
-  name: 'Demo User',
-  email: 'demo@komoditas.com',
-  password: 'demo1234',
-  role: 'pembeli',
-};
+import { getUserByEmail, createUser } from '@/lib/users';
 
 const handler = NextAuth({
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code"
+        }
+      }
     }),
     GitHubProvider({
       clientId: process.env.GITHUB_CLIENT_ID ?? '',
@@ -36,18 +32,16 @@ const handler = NextAuth({
           return null;
         }
 
-        const user = users[credentials.email.toLowerCase()];
-        
+        const user = getUserByEmail(credentials.email);
+
         // Auto-register if user doesn't exist (demo mode)
         if (!user) {
-          users[credentials.email.toLowerCase()] = {
-            id: String(Object.keys(users).length + 1),
+          const newUser = createUser({
             name: credentials.email.split('@')[0],
             email: credentials.email.toLowerCase(),
             password: credentials.password,
             role: 'pembeli',
-          };
-          const newUser = users[credentials.email.toLowerCase()];
+          });
           return {
             id: newUser.id,
             email: newUser.email,
@@ -76,23 +70,10 @@ const handler = NextAuth({
     strategy: 'jwt',
   },
   callbacks: {
-    async signIn({ user }) {
-      // Auto-register OAuth users (Google, GitHub) into in-memory store
-      if (user?.email && !users[user.email]) {
-        users[user.email] = {
-          id: user.id ?? String(Object.keys(users).length + 1),
-          name: user.name ?? user.email.split('@')[0],
-          email: user.email,
-          password: '',
-          role: 'pembeli',
-        };
-      }
-      return true;
-    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        const fullUser = users[user.email ?? ''];
+        const fullUser = getUserByEmail(user.email ?? '');
         if (fullUser) {
           token.role = fullUser.role;
         }
@@ -113,6 +94,7 @@ const handler = NextAuth({
     },
   },
   secret: process.env.NEXTAUTH_SECRET ?? 'komoditas-sumut-secret-key-2026',
+  debug: true,
 });
 
 export { handler as GET, handler as POST };

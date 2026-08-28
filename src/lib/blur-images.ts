@@ -23,7 +23,7 @@ const productColors: Record<string, string> = {
   'minyak-sawit-mentah': '#ca8a04',
   'teh-dolok-sanggul': '#166534',
   'karet-remah-sumbawa': '#a3a3a3',
-  'ikan-mas-bakar-toba': '#ea580c',
+  'ikan-mas-toba': '#ea580c',
   'jahe-merah-organik': '#b91c1c',
   'manggis-segar-deli': '#7e22ce',
   'sarang-burung-walet-premium': '#fef3c7',

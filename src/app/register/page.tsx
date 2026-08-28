@@ -36,14 +36,31 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const result = await signIn('credentials', {
+      // Step 1: Register the user via API
+      const registerRes = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, phone, location, role }),
+      });
+
+      const registerData = await registerRes.json();
+
+      if (!registerRes.ok) {
+        setError(registerData.error || 'Gagal mendaftar. Silakan coba lagi.');
+        setLoading(false);
+        return;
+      }
+
+      // Step 2: Auto sign-in after successful registration
+      const signInResult = await signIn('credentials', {
         email,
         password,
         redirect: false,
       });
 
-      if (result?.error) {
-        setError('Gagal mendaftar. Silakan coba lagi.');
+      if (signInResult?.error) {
+        // Registration succeeded but auto-login failed - redirect to login page
+        router.push('/login?registered=1');
       } else {
         router.push('/');
         router.refresh();
@@ -61,8 +78,16 @@ export default function RegisterPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-forest-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
-              SU
+            <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-forest-600 rounded-xl flex items-center justify-center shadow-lg">
+              <svg className="w-7 h-7 text-white" viewBox="0 0 32 32" fill="none">
+                <path d="M16 4C10 4 6 10 6 16C6 22 10 28 16 28C16 28 16 18 16 16C16 14 18 8 16 4Z" fill="currentColor" opacity="0.9"/>
+                <path d="M16 4C22 4 26 10 26 16C26 22 22 28 16 28C16 28 16 18 16 16C16 14 14 8 16 4Z" fill="currentColor" opacity="0.6"/>
+                <path d="M16 16V28" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                <path d="M16 10L12 14" stroke="white" strokeWidth="1" strokeLinecap="round" opacity="0.5"/>
+                <path d="M16 10L20 14" stroke="white" strokeWidth="1" strokeLinecap="round" opacity="0.5"/>
+                <path d="M16 15L13 18" stroke="white" strokeWidth="1" strokeLinecap="round" opacity="0.5"/>
+                <path d="M16 15L19 18" stroke="white" strokeWidth="1" strokeLinecap="round" opacity="0.5"/>
+              </svg>
             </div>
           </Link>
           <h1 className="font-display font-bold text-2xl text-gray-900 mt-4">Buat Akun Baru</h1>

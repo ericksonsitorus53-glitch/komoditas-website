@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { ArrowRight, TrendingUp, Star, MapPin, Shield, Truck, Clock, ChevronRight, Award, Users, Leaf } from 'lucide-react';
-import { products, categories, leaderboard, siteStats } from '@/lib/data';
+import { ArrowRight, TrendingUp, Shield, Truck, Leaf } from 'lucide-react';
+import { products, categories } from '@/lib/data';
 import ProductCard from '@/components/ProductCard';
 import StatsSection from '@/components/StatsSection';
 
@@ -23,7 +23,7 @@ export default function HomePage() {
             <div className="text-white">
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
                 <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                <span className="text-sm font-medium">🌱 Platform Komoditas #1 Sumatera Utara</span>
+                <span className="text-sm font-medium">🌱 Platform Komoditas Sumatera Utara</span>
               </div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-tight">
                 Jual Beli Komoditas
@@ -42,22 +42,13 @@ export default function HomePage() {
                 </Link>
               </div>
               <div className="flex items-center gap-8 mt-10 pt-8 border-t border-white/10">
-                <div className="flex items-center gap-3">
-                  <div className="flex -space-x-3">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 border-2 border-primary-900 flex items-center justify-center text-white text-xs font-bold">
-                        {String.fromCharCode(64 + i)}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="text-sm">
-                    <div className="font-bold text-white">108+ Member</div>
-                    <div className="text-primary-200">Aktif bergabung</div>
-                  </div>
-                </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Shield className="w-5 h-5 text-earth-300" />
                   <span className="text-primary-100">Transaksi Aman & Terpercaya</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Truck className="w-5 h-5 text-earth-300" />
+                  <span className="text-primary-100">Pengiriman Seluruh Indonesia</span>
                 </div>
               </div>
             </div>
@@ -76,13 +67,13 @@ export default function HomePage() {
                 </div>
                 <div className="mt-4 bg-white/10 rounded-2xl p-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-primary-200">Total Transaksi Hari Ini</span>
-                    <span className="text-sm font-bold text-earth-300">Rp 285 Juta</span>
+                    <span className="text-sm text-primary-200">Total Produk</span>
+                    <span className="text-sm font-bold text-earth-300">{products.length} produk</span>
                   </div>
                   <div className="mt-2 h-2 bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-earth-400 to-primary-400 rounded-full" style={{ width: '73%' }}></div>
+                    <div className="h-full bg-gradient-to-r from-earth-400 to-primary-400 rounded-full" style={{ width: '100%' }}></div>
                   </div>
-                  <div className="text-xs text-primary-200 mt-1">73% dari target harian</div>
+                  <div className="text-xs text-primary-200 mt-1">Tersedia untuk dipesan</div>
                 </div>
               </div>
             </div>
@@ -146,69 +137,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Leaderboard Preview */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-10">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Award className="w-5 h-5 text-earth-500" />
-                <span className="text-sm font-semibold text-earth-600 uppercase tracking-wide">Peringkat</span>
-              </div>
-              <h2 className="section-title">Leaderboard Penjual</h2>
-              <p className="section-subtitle">Penjual terbaik berdasarkan performa dan kepuasan pelanggan</p>
-            </div>
-            <Link href="/leaderboard" className="hidden sm:flex items-center gap-2 text-primary-600 font-semibold hover:text-primary-700 transition-colors">
-              Lihat Lengkap <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            {/* Top 3 */}
-            <div className="p-8 bg-gradient-to-r from-earth-50 to-primary-50">
-              <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">
-                {leaderboard.slice(0, 3).map((entry, i) => (
-                  <div key={entry.memberId} className={`text-center ${i === 0 ? 'order-2 -mt-4' : i === 1 ? 'order-1' : 'order-3'}`}>
-                    <span className="text-3xl mb-2 block">{entry.badge}</span>
-                    <img
-                      src={entry.memberAvatar}
-                      alt={entry.memberName}
-                      className={`w-16 h-16 rounded-full mx-auto border-4 object-cover ${
-                        i === 0 ? 'border-yellow-400 w-20 h-20' : 'border-gray-200'
-                      }`}
-                    />
-                    <h4 className="font-display font-semibold text-gray-900 mt-3 text-sm">{entry.memberName}</h4>
-                    <p className="text-xs text-gray-500">{entry.memberRole}</p>
-                    <div className="mt-2 text-lg font-bold text-primary-600">{entry.score.toLocaleString('id-ID')} poin</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Rest of leaderboard */}
-            <div className="divide-y divide-gray-100">
-              {leaderboard.slice(3, 6).map((entry) => (
-                <div key={entry.memberId} className="flex items-center gap-4 px-6 py-4 hover:bg-gray-50 transition-colors">
-                  <span className="text-lg font-bold text-gray-400 w-8">#{entry.rank}</span>
-                  <img src={entry.memberAvatar} alt={entry.memberName} className="w-10 h-10 rounded-full object-cover" />
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900">{entry.memberName}</h4>
-                    <p className="text-xs text-gray-500">{entry.memberRole}</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-bold text-primary-600">{entry.score.toLocaleString('id-ID')} poin</div>
-                    <div className="text-xs text-gray-500 flex items-center gap-1">
-                      <Star className="w-3 h-3 text-earth-400 fill-earth-400" />
-                      {entry.rating}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Why Us Section */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -264,8 +192,8 @@ export default function HomePage() {
             Mulai Jual Komoditas Anda Sekarang
           </h2>
           <p className="text-lg text-primary-100 mt-4 max-w-2xl mx-auto">
-            Bergabung dengan 108+ penjual lainnya dan jangkau pembeli dari seluruh Indonesia. 
-            Daftar gratis tanpa biaya admin!
+            Daftar sebagai penjual dan jangkau pembeli dari seluruh Indonesia. 
+            Gratis tanpa biaya admin!
           </p>
           <div className="flex flex-wrap justify-center gap-4 mt-8">
             <Link href="/register" className="btn-earth text-base px-8 py-4">
