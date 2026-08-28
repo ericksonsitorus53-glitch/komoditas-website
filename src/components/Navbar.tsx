@@ -24,8 +24,8 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-forest-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-              <svg className="w-6 h-6 text-white" viewBox="0 0 32 32" fill="none">
+            <div className="w-11 h-11 bg-gradient-to-br from-forest-700 via-primary-600 to-forest-800 rounded-xl flex items-center justify-center shadow-lg shadow-forest-600/30 group-hover:scale-105 transition-transform duration-300">
+              <svg className="w-7 h-7 text-white" viewBox="0 0 32 32" fill="none">
                 <path d="M16 4C10 4 6 10 6 16C6 22 10 28 16 28C16 28 16 18 16 16C16 14 18 8 16 4Z" fill="currentColor" opacity="0.9"/>
                 <path d="M16 4C22 4 26 10 26 16C26 22 22 28 16 28C16 28 16 18 16 16C16 14 14 8 16 4Z" fill="currentColor" opacity="0.6"/>
                 <path d="M16 16V28" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -37,8 +37,8 @@ export default function Navbar() {
             </div>
             <div className="hidden sm:block">
               <span className="font-display font-bold text-lg text-gray-900">Komoditas</span>
-              <span className="font-display font-bold text-lg text-primary-600"> Sumut</span>
-              <p className="text-[10px] text-gray-400 -mt-1">Bumi Pertiwi</p>
+              <span className="font-display font-bold text-lg text-forest-600"> Sumut</span>
+              <p className="text-[10px] text-earth-500 font-medium -mt-1 tracking-wider">BUMI PERTIWI</p>
             </div>
           </Link>
 
