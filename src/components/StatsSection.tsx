@@ -3,7 +3,7 @@
 import { Package, Leaf, MapPin, Shield } from 'lucide-react';
 
 const stats = [
-  { icon: Package, label: 'Produk Tersedia', value: '21+', color: 'text-primary-500', bg: 'bg-primary-50', border: 'border-primary-100' },
+  { icon: Package, label: 'Produk Tersedia', value: '22+', color: 'text-primary-500', bg: 'bg-primary-50', border: 'border-primary-100' },
   { icon: MapPin, label: 'Asal Daerah', value: '8+', color: 'text-blue-500', bg: 'bg-blue-50', border: 'border-blue-100' },
   { icon: Leaf, label: 'Produk Organik', value: '8+', color: 'text-earth-500', bg: 'bg-earth-50', border: 'border-earth-100' },
   { icon: Shield, label: 'Kualitas Terjamin', value: '100%', color: 'text-purple-500', bg: 'bg-purple-50', border: 'border-purple-100' },

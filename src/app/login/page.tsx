@@ -27,11 +27,15 @@ function LoginForm() {
   useEffect(() => {
     const authError = searchParams.get('error');
     const registered = searchParams.get('registered');
+    const reset = searchParams.get('reset');
     if (authError) {
       setError(ERROR_MESSAGES[authError] || ERROR_MESSAGES.default);
     }
     if (registered === '1') {
       setSuccess('Registrasi berhasil! Silakan masuk dengan email dan password yang baru dibuat.');
+    }
+    if (reset === '1') {
+      setSuccess('Password berhasil diubah! Silakan masuk dengan password baru.');
     }
   }, [searchParams]);
 

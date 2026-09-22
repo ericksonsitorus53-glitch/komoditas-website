@@ -63,7 +63,7 @@ export default function TentangPage() {
               <div className="grid grid-cols-2 gap-4 mt-6">
                 {[
                   { icon: MapPin, value: '8+', label: 'Asal Daerah' },
-                  { icon: Award, value: '21+', label: 'Produk' },
+                  { icon: Award, value: '22+', label: 'Produk' },
                   { icon: Shield, value: '100%', label: 'Kualitas Terjamin' },
                 ].map(({ icon: Icon, value, label }) => (
                   <div key={label} className="p-4 bg-gray-50 rounded-xl text-center">

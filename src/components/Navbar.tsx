@@ -4,19 +4,27 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { Menu, X, Search, ShoppingCart, User, ChevronDown, MapPin, Bell, LogOut, Settings, LayoutDashboard } from 'lucide-react';
-
-const navLinks = [
-  { href: '/', label: 'Beranda' },
-  { href: '/produk', label: 'Produk' },
-  { href: '/tentang', label: 'Tentang' },
-  { href: '/kontak', label: 'Kontak' },
-];
+import LanguageSelector from '@/components/LanguageSelector';
+import { useI18n } from '@/lib/i18n-context';
+import { useCart } from '@/lib/cart-context';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { data: session } = useSession();
+  const { t } = useI18n();
+  const { totalItems } = useCart();
+
+  // Navigation links with translations
+  const navLinks = [
+    { href: '/', label: t.navHome },
+    { href: '/produk', label: t.navProducts },
+    { href: '/webgis', label: 'Peta Komoditas' },
+    { href: '/analytics', label: 'Analitik' },
+    { href: '/tentang', label: t.navAbout },
+    { href: '/kontak', label: t.navContact },
+  ];
 
   return (
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100 shadow-sm">
@@ -58,6 +66,19 @@ export default function Navbar() {
 
           {/* Right Actions - Desktop */}
           <div className="hidden lg:flex items-center gap-3">
+            <LanguageSelector />
+            <Link
+              href="/keranjang"
+              className="relative flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all"
+              title="Keranjang Belanja"
+            >
+              <ShoppingCart className="w-5 h-5" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                  {totalItems}
+                </span>
+              )}
+            </Link>
             <a
               href="https://wa.me/6285377018574"
               target="_blank"
@@ -136,25 +157,37 @@ export default function Navbar() {
               <>
                 <Link href="/login" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-all">
                   <User className="w-4 h-4" />
-                  Masuk
+                  {t.navLogin}
                 </Link>
                 <Link href="/register" className="btn-primary text-sm py-2.5 px-5">
-                  Daftar Gratis
+                  {t.navRegister}
                 </Link>
               </>
             )}
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Cart Icon */}
+          <Link
+            href="/keranjang"
+            className="lg:hidden relative p-2 rounded-xl text-gray-500 hover:bg-gray-100 transition-colors"
+          >
+            <ShoppingCart className="w-5 h-5" />
+            {totalItems > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                {totalItems}
+              </span>
+            )}
+          </Link>
+          <div className="lg:hidden">
+            <LanguageSelector />
+          </div>
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="lg:hidden p-2 rounded-xl text-gray-500 hover:bg-gray-100 transition-colors"
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
-        </div>
-
-        {/* Desktop Navigation */}
+        </div>          {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center gap-1 pb-3">
           {navLinks.map((link) => (
             <Link
@@ -192,6 +225,9 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+            <div className="py-2">
+              <LanguageSelector />
+            </div>
             <a
               href="https://wa.me/6285377018574"
               target="_blank"

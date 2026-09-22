@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateResetToken, userExists } from '@/lib/users';
+import { getUserByEmail, generateResetToken } from '@/lib/users';
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,21 +20,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Always return success to prevent email enumeration
-    if (!userExists(email)) {
-      return NextResponse.json({
-        message: 'Jika email terdaftar, tautan reset password sudah dikirim.',
-      });
+    const user = getUserByEmail(email);
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Email tidak terdaftar. Silakan daftar terlebih dahulu.' },
+        { status: 404 }
+      );
     }
 
+    // Generate token and return it for direct use (no email needed)
     const token = generateResetToken(email);
 
-    // In production you would send an email here.
-    // For demo mode we return the token directly so the user can use it.
     return NextResponse.json({
-      message: 'Jika email terdaftar, tautan reset password sudah dikirim.',
-      // Demo: return token so the user can proceed without email
-      ...(process.env.NODE_ENV !== 'production' && token ? { token } : {}),
+      message: 'Email ditemukan. Silakan masukkan password baru.',
+      token,
     });
   } catch {
     return NextResponse.json(

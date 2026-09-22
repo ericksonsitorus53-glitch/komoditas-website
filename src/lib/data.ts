@@ -81,6 +81,11 @@ export const categories: Category[] = [
     icon: '🫙', description: 'Produk kesehatan dan superfood premium dari Sumatera Utara',
     productCount: 1, image: 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=600&h=400&fit=crop'
   },
+  {
+    id: '10', name: 'Kayu & Biomassa', slug: 'kayu-biomassa',
+    icon: '🪵', description: 'Produk kayu dan biomassa energi terbarukan dari hutan tanaman Sumatera Utara',
+    productCount: 1, image: '/images/products/wood-pellet.jpg'
+  },
 ];
 
 // ---- PRODUK ----
@@ -273,6 +278,15 @@ export const products: Product[] = [
     image: 'https://images.unsplash.com/photo-1763741220758-f88c62a7ed6e?w=600&h=400&fit=crop',
     rating: 0, reviews: 0, sold: 0, stock: 200, isFeatured: false, isOrganic: false,
     tags: ['pinang', 'kering', 'ekspor', 'industri']
+  },
+  {
+    id: '22', name: 'Wood Pellet Sawit', slug: 'wood-pellet-sawit',
+    description: 'Wood pellet biomassa premium dari limbah kayu dan serbuk gergaji hutan tanaman Sumatera Utara. Silinder padat 6-8 mm dengan nilai kalor tinggi (±4.000 kcal/kg), kadar air rendah di bawah 10%, dan abu sedikit. Bahan bakar ramah lingkungan untuk industri, boiler, dan pembangkit listrik energi terbarukan.',
+    price: 6500, unit: '1 kg', category: 'Kayu & Biomassa', categorySlug: 'kayu-biomassa',
+    origin: 'Simalungun', seller: 'Agro Sumut', sellerId: '8',
+    image: '/images/products/wood-pellet.jpg',
+    rating: 0, reviews: 0, sold: 0, stock: 5000, isFeatured: true, isOrganic: true,
+    tags: ['wood pellet', 'biomassa', 'energi', 'ramah lingkungan']
   },
 ];
 

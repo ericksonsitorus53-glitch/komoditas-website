@@ -2,20 +2,27 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Mail, ArrowLeft, KeyRound, AlertCircle, CheckCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Mail, Lock, Eye, EyeOff, ArrowLeft, KeyRound, AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function LupaPasswordPage() {
+  const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [step, setStep] = useState<'email' | 'reset'>('email');
   const [email, setEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [resetToken, setResetToken] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [resetToken, setResetToken] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Step 1: verify email exists and get token
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    setResetToken('');
     setLoading(true);
 
     try {
@@ -28,16 +35,58 @@ export default function LupaPasswordPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || 'Gagal memproses permintaan. Silakan coba lagi.');
+        setError(data.error || 'Email tidak ditemukan.');
         return;
       }
 
-      setSuccess(data.message);
-
-      // In demo mode the API returns the token directly
       if (data.token) {
         setResetToken(data.token);
+        setStep('reset');
       }
+    } catch {
+      setError('Terjadi kesalahan. Silakan coba lagi.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Step 2: reset password directly
+  const handleResetSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (newPassword.length < 6) {
+      setError('Password minimal 6 karakter.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError('Konfirmasi password tidak cocok.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: resetToken, newPassword }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || 'Gagal mengubah password.');
+        return;
+      }
+
+      setSuccess('Password berhasil diubah! Mengalihkan ke halaman masuk...');
+
+      setTimeout(() => {
+        router.push('/login?reset=1');
+      }, 2000);
     } catch {
       setError('Terjadi kesalahan. Silakan coba lagi.');
     } finally {
@@ -63,8 +112,14 @@ export default function LupaPasswordPage() {
               </svg>
             </div>
           </Link>
-          <h1 className="font-display font-bold text-2xl text-gray-900 mt-4">Lupa Password</h1>
-          <p className="text-gray-500 mt-1">Masukkan email Anda untuk reset password</p>
+          <h1 className="font-display font-bold text-2xl text-gray-900 mt-4">
+            {step === 'email' ? 'Lupa Password' : 'Buat Password Baru'}
+          </h1>
+          <p className="text-gray-500 mt-1">
+            {step === 'email'
+              ? 'Masukkan email akun Anda'
+              : `Reset password untuk ${email}`}
+          </p>
         </div>
 
         {/* Form */}
@@ -82,8 +137,9 @@ export default function LupaPasswordPage() {
             </div>
           )}
 
-          {!resetToken ? (
-            <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Step 1: Email */}
+          {step === 'email' && !success && (
+            <form onSubmit={handleEmailSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
                 <div className="relative">
@@ -110,32 +166,103 @@ export default function LupaPasswordPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                     </svg>
-                    Mengirim...
+                    Memeriksa email...
                   </span>
                 ) : (
                   <span className="flex items-center justify-center gap-2">
-                    <KeyRound className="w-5 h-5" /> Kirim Tautan Reset
+                    <KeyRound className="w-5 h-5" /> Lanjutkan
                   </span>
                 )}
               </button>
             </form>
-          ) : (
-            <div className="space-y-4">
-              <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
-                <p className="text-sm text-amber-800 font-medium mb-2">Demo Mode</p>
-                <p className="text-sm text-amber-700">
-                  Karena ini mode demo (tanpa email service), token reset password kamu adalah:
-                </p>
-                <code className="block mt-2 p-3 bg-white rounded-lg text-xs text-gray-800 break-all font-mono border border-amber-100">
-                  {resetToken}
-                </code>
+          )}
+
+          {/* Step 2: New Password */}
+          {step === 'reset' && !success && (
+            <form onSubmit={handleResetSubmit} className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Password Baru</label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Minimal 6 karakter"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    className="input-field pl-12 pr-12"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
 
-              <Link
-                href={`/reset-password?token=${resetToken}`}
-                className="btn-primary w-full py-3 flex items-center justify-center gap-2"
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Konfirmasi Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type={showConfirm ? 'text' : 'password'}
+                    placeholder="Ulangi password baru"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    className="input-field pl-12 pr-12"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm(!showConfirm)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showConfirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary w-full py-3 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <KeyRound className="w-5 h-5" /> Reset Password Sekarang
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Mengubah password...
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    <KeyRound className="w-5 h-5" /> Ubah Password
+                  </span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { setStep('email'); setError(''); setNewPassword(''); setConfirmPassword(''); }}
+                className="w-full text-sm text-gray-500 hover:text-gray-700 py-2"
+              >
+                ← Ganti email lain
+              </button>
+            </form>
+          )}
+
+          {success && (
+            <div className="text-center">
+              <Link
+                href="/login"
+                className="btn-primary inline-flex items-center gap-2 py-3 px-6"
+              >
+                Masuk Sekarang
               </Link>
             </div>
           )}

@@ -28,6 +28,7 @@ const productColors: Record<string, string> = {
   'manggis-segar-deli': '#7e22ce',
   'sarang-burung-walet-premium': '#fef3c7',
   'kepiting-batu-hidup': '#dc2626',
+  'wood-pellet-sawit': '#92400e',
 };
 
 let cachedBlurData: ProductWithBlur[] | null = null;

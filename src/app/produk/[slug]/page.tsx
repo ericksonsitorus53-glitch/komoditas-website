@@ -4,6 +4,7 @@ import { MapPin, ShoppingCart, Heart, Share2, ChevronRight, Store, Shield, Truck
 import { products } from '@/lib/data';
 import ProductCard from '@/components/ProductCard';
 import ProductImage from '@/components/ProductImage';
+import MarkAsSoldButton from '@/components/MarkAsSoldButton';
 import { getProductBlurData } from '@/lib/blur-images';
 import { ProductJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
 
@@ -184,6 +185,16 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                   Beli Sekarang
                 </a>
               </div>
+
+              {/* Mark as Sold - Only visible to logged-in sellers */}
+              <MarkAsSoldButton
+                productId={product.id}
+                productName={product.name}
+                productSlug={product.slug}
+                category={product.category}
+                price={product.price}
+                sellerName={product.seller}
+              />
 
               <div className="flex gap-3 mt-3">
                 <button className="btn-secondary flex-1 text-sm">
