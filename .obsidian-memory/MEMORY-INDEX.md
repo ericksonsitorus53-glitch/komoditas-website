@@ -65,7 +65,7 @@
 
 | Item | Count |
 |------|-------|
-| Products | 22 |
+| Products | 24 |
 | Members | 10 |
 | Categories | 10 |
 | Blog Posts | 5 |

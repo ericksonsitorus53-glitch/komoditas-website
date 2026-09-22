@@ -19,9 +19,9 @@ Platform marketplace komoditas pertanian, perkebunan, perikanan, dan biomassa Su
 ### Pages (sesuai build output Next.js)
 | Page | Route | Description |
 |------|-------|-------------|
-| Homepage | `/` | Hero, kategori (10), produk unggulan, stats 22 komoditas |
+| Homepage | `/` | Hero, kategori (10), produk unggulan, stats 24 komoditas |
 | Produk | `/produk` | Listing semua produk + filter kategori |
-| Detail Produk | `/produk/[slug]` | SSG — 22 halaman statis, JSON-LD, WhatsApp buy |
+| Detail Produk | `/produk/[slug]` | SSG — 24 halaman statis (46 build output), JSON-LD, WhatsApp buy |
 | Keranjang | `/keranjang` | Shopping cart (cart-context) |
 | Dashboard | `/dashboard` | Dashboard penjual: stats, penjualan, pencapaian |
 | Analytics | `/analytics` | Grafik penjualan (recharts) |
@@ -66,10 +66,9 @@ Platform marketplace komoditas pertanian, perkebunan, perikanan, dan biomassa Su
 | `blur-images.ts` | Blur placeholder per produk (warna dominan) |
 
 ### Data Snapshot (2026-09-22)
-- **Produk**: 22 (terbaru: Wood Pellet Sawit, id 22)
-- **Kategori**: 10 — termasuk 🪵 Kayu & Biomassa (baru)
-- **Bahasa**: 6 (ID + 5 lainnya via translations.ts)
-- **Foto produk**: hotlink Unsplash + lokal `public/images/products/` (wood-pellet.jpg = Wikimedia Commons, CC BY-SA)
+- **Produk**: 24 (terbaru: Arang Kayu Keras id 23, Briket Arang Tempurung Kelapa id 24)
+- **Kategori**: 10 — 🪵 Kayu & Biomassa kini berisi 3 produk: Wood Pellet Sawit (22), Arang Kayu Keras (23, Padang Lawas, Rp 9.500/kg), Briket Arang Tempurung Kelapa (24, Langkat, Rp 12.000/kg)
+- **Foto biomassa lokal** (`public/images/products/`, semua Wikimedia Commons CC): wood-pellet.jpg, arang-kayu.jpg, briket-arang.jpg — pilih foto **landscape** untuk card 4:3
 
 ## 🛠️ Tech Stack
 
@@ -131,7 +130,7 @@ Platform marketplace komoditas pertanian, perkebunan, perikanan, dan biomassa Su
 - [x] GitHub ↔ Vercel auto-deploy + SSH push — DONE (2026-09-22)
 - [ ] Review all pages functionality
 - [ ] Optimize performance
-- [ ] Perluas katalog biomassa (arang, briquette) — opsi berikutnya
+- [x] Perluas katalog biomassa (arang kayu, briket tempurung) — DONE (2026-09-22)
 
 ---
 *Last Updated: 2026-09-22*

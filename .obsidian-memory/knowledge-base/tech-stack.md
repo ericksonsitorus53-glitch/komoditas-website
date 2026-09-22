@@ -5,7 +5,7 @@
 ### Next.js 14 (App Router)
 - **Version**: 14.2.0+
 - **Purpose**: React framework for production
-- **Key Features**: SSG (`generateStaticParams` untuk 22 halaman produk), API routes, file-based routing
+- **Key Features**: SSG (`generateStaticParams` untuk 24 halaman produk), API routes, file-based routing
 - **Build output**: statis untuk halaman konten, dinamis (`ƒ`) untuk API routes
 
 ## Languages
@@ -31,7 +31,7 @@
 | clsx | ^2.1.0 | Class names utility |
 
 ## Data Layer
-- **Statis**: `src/lib/data.ts` — 22 produk, 10 kategori (source of truth katalog)
+- **Statis**: `src/lib/data.ts` — 24 produk, 10 kategori (source of truth katalog)
 - **Database**: `src/lib/db.ts` — Neon Postgres, lazy client, schema idempotent (`sales`, `achievements`)
 - **Env**: `DATABASE_URL` (wajib untuk fitur sales; tanpa itu error jelas di request time)
 
