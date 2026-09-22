@@ -38,6 +38,13 @@
   - Complete file structure
 
 ### Work Logs
+- [[logs/2026-09-22]] - September 22, 2026
+  - Wood pellet product + Kayu & Biomassa category
+  - Deploy wood pellet to production
+  - GitHub repo setup + force push full history
+  - Vercel Git integration (auto-deploy) — verified end-to-end
+  - SSH key registered via device flow (tokenless push)
+  - Memory refresh (this update)
 - [[logs/2026-08-22]] - August 22, 2026
   - Memory system setup
   - Project documentation
@@ -58,13 +65,15 @@
 
 | Item | Count |
 |------|-------|
-| Products | 30 |
+| Products | 22 |
 | Members | 10 |
-| Categories | 9 |
+| Categories | 10 |
 | Blog Posts | 5 |
 | FAQs | 8 |
-| Pages | 9 |
-| Components | 4 |
+| Pages | 15+ |
+| Components | 8+ |
+| Languages | 6 |
+| API Routes | 5 |
 
 ---
 
@@ -74,6 +83,19 @@
 2. ✅ **Project Documented** - All features, data, and structure
 3. ✅ **Code Backed Up** - Complete reference for recreation
 4. ✅ **Work Logged** - Timestamped activities
+
+---
+
+## 🚀 Deployment Quick Reference
+
+| Item | Value |
+|------|-------|
+| Production URL | https://komoditas-sumut.vercel.app |
+| GitHub repo | `ericksonsitorus53-glitch/komoditas-website` (main) |
+| Remote | `git@github.com:ericksonsitorus53-glitch/komoditas-website.git` (SSH) |
+| Deploy | **Auto**: push ke main = live ±1 menit (Vercel Git integration) |
+| SSH key | `~/.ssh/id_ed25519` — fp `SHA256:NpH0b3ioUMTqVk/5S7chmzFeXe18v6ScbDuQPzuaHww` |
+| DB | Neon Postgres via `DATABASE_URL` |
 
 ---
 
@@ -96,5 +118,5 @@ In Obsidian:
 
 ---
 
-*Last Updated: 2026-08-22*
+*Last Updated: 2026-09-22*
 *Memory System: Active & Comprehensive*

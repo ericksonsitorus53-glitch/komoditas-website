@@ -245,7 +245,7 @@ export default function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
               { number: '500+', label: 'Petani Aktif', icon: Users },
-              { number: '22', label: 'Jenis Komoditas', icon: Package },
+              { number: '24', label: 'Jenis Komoditas', icon: Package },
               { number: '34', label: 'Kabupaten/Kota', icon: MapPin },
               { number: '4.8', label: 'Rating Platform', icon: Star },
             ].map((stat) => {

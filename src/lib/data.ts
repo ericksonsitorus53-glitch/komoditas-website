@@ -84,7 +84,7 @@ export const categories: Category[] = [
   {
     id: '10', name: 'Kayu & Biomassa', slug: 'kayu-biomassa',
     icon: '🪵', description: 'Produk kayu dan biomassa energi terbarukan dari hutan tanaman Sumatera Utara',
-    productCount: 1, image: '/images/products/wood-pellet.jpg'
+    productCount: 3, image: '/images/products/wood-pellet.jpg'
   },
 ];
 
@@ -287,6 +287,24 @@ export const products: Product[] = [
     image: '/images/products/wood-pellet.jpg',
     rating: 0, reviews: 0, sold: 0, stock: 5000, isFeatured: true, isOrganic: true,
     tags: ['wood pellet', 'biomassa', 'energi', 'ramah lingkungan']
+  },
+  {
+    id: '23', name: 'Arang Kayu Keras', slug: 'arang-kayu-keras',
+    description: 'Arang kayu keras kualitas ekspor dari hutan tanaman Sumatera Utara. Dibakar secara tradisional dalam tungku tanah sehingga menghasilkan arang padat bertekstur keras, panas stabil dan tahan lama, tanpa asap berlebih. Cocok untuk BBQ, restoran, industri, dan bahan baku briket.',
+    price: 9500, unit: '1 kg', category: 'Kayu & Biomassa', categorySlug: 'kayu-biomassa',
+    origin: 'Padang Lawas', seller: 'Agro Sumut', sellerId: '8',
+    image: '/images/products/arang-kayu.jpg',
+    rating: 0, reviews: 0, sold: 0, stock: 800, isFeatured: false, isOrganic: false,
+    tags: ['arang', 'charcoal', 'kayu keras', 'bbq', 'ekspor']
+  },
+  {
+    id: '24', name: 'Briket Arang Tempurung Kelapa', slug: 'briket-arang-tempurung-kelapa',
+    description: 'Briket arang tempurung kelapa grade ekspor dari Sumatera Utara. Padat, tidak mudah pecah, nilai kalor tinggi (±7.000 kcal/kg), waktu bakar hingga 3 jam, minim abu dan tanpa bau. Favorit untuk shisha, BBQ, dan pasar Eropa-Timur Tengah.',
+    price: 12000, unit: '1 kg', category: 'Kayu & Biomassa', categorySlug: 'kayu-biomassa',
+    origin: 'Langkat', seller: 'Agro Sumut', sellerId: '8',
+    image: '/images/products/briket-arang.jpg',
+    rating: 0, reviews: 0, sold: 0, stock: 1200, isFeatured: true, isOrganic: false,
+    tags: ['briket', 'arang kelapa', 'tempurung', 'shisha', 'ekspor']
   },
 ];
 

@@ -29,6 +29,8 @@ const productColors: Record<string, string> = {
   'sarang-burung-walet-premium': '#fef3c7',
   'kepiting-batu-hidup': '#dc2626',
   'wood-pellet-sawit': '#92400e',
+  'arang-kayu-keras': '#1c1917',
+  'briket-arang-tempurung-kelapa': '#292524',
 };
 
 let cachedBlurData: ProductWithBlur[] | null = null;

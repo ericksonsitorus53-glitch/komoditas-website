@@ -1,303 +1,138 @@
 # 📋 Current Project - KomoditasSumut
 
 ## Project Name
-**KomoditasSumut** - Platform Komoditas Sumatera Utara
+**KomoditasSumut** - Marketplace Komoditas Bumi Sumatera Utara
 
 ## Status
 - **Created**: 2026-08-22
-- **Last Updated**: 2026-08-22
-- **Status**: ✅ Active
+- **Last Updated**: 2026-09-22
+- **Status**: ✅ Active — live di production
+- **URL**: https://komoditas-sumut.vercel.app
+- **Version**: 1.0.1 (tag `v1.0.1`)
 
 ## 📌 Overview
 
-Platform marketplace komoditas pertanian dan perkebunan Sumatera Utara. Menghubungkan petani, penjual, distributor, dan pembeli dalam satu ekosistem digital.
+Platform marketplace komoditas pertanian, perkebunan, perikanan, dan biomassa Sumatera Utara. Menghubungkan petani, penjual, distributor, dan pembeli. Dilengkapi keranjang belanja, multi-bahasa (6 bahasa), dashboard penjual, analitik penjualan, dan peta komoditas WebGIS.
 
 ## 🎯 Features
 
-### Pages
+### Pages (sesuai build output Next.js)
 | Page | Route | Description |
 |------|-------|-------------|
-| Homepage | `/` | Landing page dengan hero, kategori, produk unggulan, leaderboard |
-| Produk | `/produk` | Listing semua produk dengan filter |
-| Detail Produk | `/produk/[slug]` | Halaman detail produk |
-| Blog | `/blog` | Artikel dan berita |
-| Detail Blog | `/blog/[slug]` | Halaman artikel |
-| FAQ | `/faq` | Pertanyaan umum |
-| Tentang | `/tentang` | Tentang platform |
+| Homepage | `/` | Hero, kategori (10), produk unggulan, stats 22 komoditas |
+| Produk | `/produk` | Listing semua produk + filter kategori |
+| Detail Produk | `/produk/[slug]` | SSG — 22 halaman statis, JSON-LD, WhatsApp buy |
+| Keranjang | `/keranjang` | Shopping cart (cart-context) |
+| Dashboard | `/dashboard` | Dashboard penjual: stats, penjualan, pencapaian |
+| Analytics | `/analytics` | Grafik penjualan (recharts) |
+| WebGIS | `/webgis` | Peta komoditas 20 kabupaten/kota Sumut |
+| Login | `/login` | Google OAuth + Email (NextAuth) |
+| Register | `/register` | Pendaftaran |
+| Lupa Password | `/lupa-password` | + API forgot/reset password |
+| Profil | `/profil` | Profil user + pengaturan |
+| Tentang | `/tentang` | Company profile |
 | Kontak | `/kontak` | Form kontak |
-| Register | `/register` | Pendaftaran dengan Google/Otomatic |
-| Login | `/login` | Login dengan Google/Email |
-| Profil | `/profil` | Halaman profil user |
-| Leaderboard | `/leaderboard` | Ranking penjual terbaik |
-| **CRM** | `/crm` | **Kelola pelanggan & leads** |
-| **Auto Blog** | `/autoblog` | **Generate artikel otomatis** |
+| Preview Gambar | `/preview-gambar` | Tool dev cek gambar produk |
 
-### Components
-| Component | File | Purpose |
-|-----------|------|---------|
-| Navbar | `src/components/Navbar.tsx` | Navigasi responsif |
-| Footer | `src/components/Footer.tsx` | Footer website |
-| ProductCard | `src/components/ProductCard.tsx` | Card produk |
-| StatsSection | `src/components/StatsSection.tsx` | Statistik platform |
-| **Chatbot** | `src/components/Chatbot.tsx` | **Customer support AI** |
-| **SEOHead** | `src/components/SEOHead.tsx` | **SEO optimization** |
-| **Providers** | `src/components/Providers.tsx` | **NextAuth session provider** |
+### API Routes
+| Route | Purpose |
+|-------|---------|
+| `/api/auth/[...nextauth]` | NextAuth (Google OAuth, credentials) |
+| `/api/auth/forgot-password` | Kirim permintaan reset password |
+| `/api/auth/reset-password` | Reset password |
+| `/api/register` | Registrasi user |
+| `/api/sales` | CRUD penjualan (Neon Postgres) |
 
-### New Features (2026-08-22)
+### Components (utama)
+| Component | Purpose |
+|-----------|---------|
+| `Navbar.tsx` | Navigasi + LanguageSelector + badge keranjang |
+| `LanguageSelector.tsx` | Ganti bahasa (6 bahasa) |
+| `ProductCard.tsx` | Card produk + add-to-cart + blur placeholder |
+| `MarkAsSoldButton.tsx` | Tandai produk terjual → catat ke API sales |
+| `StatsSection.tsx` | Statistik homepage (22+ produk) |
+| `Providers.tsx` | NextAuth + CartProvider + I18nProvider |
+| `JsonLd.tsx` | Structured data SEO |
+| `ProductCardSkeleton.tsx`, `ProductImage.tsx` | Loading & gambar |
 
-#### 🤖 Chatbot Widget
-- Auto-response untuk pertanyaan umum
-- Quick actions (Bantuan, Produk, FAQ)
-- Typing indicator
-- Responsive design
+### Lib
+| File | Purpose |
+|------|---------|
+| `data.ts` | 22 produk, 10 kategori, siteStats |
+| `db.ts` | Koneksi Neon Postgres (lazy) + schema sales/achievements |
+| `cart-context.tsx` | State keranjang belanja |
+| `i18n-context.tsx` + `languages.ts` + `translations.ts` | Sistem i18n 6 bahasa (828 baris) |
+| `achievements.ts` | Logika pencapaian penjual |
+| `blur-images.ts` | Blur placeholder per produk (warna dominan) |
 
-#### 📊 CRM Dashboard
-- Manage pelanggan (buyer, seller, farmer)
-- Filter & search
-- Stats cards
-- Customer detail modal
-- Email blast, export, campaign
-
-#### 📝 Auto Blog Generator
-- AI-powered content generation
-- Topic suggestions
-- Keyword optimization
-- Status management (draft, published, scheduled)
-
-#### 🔍 SEO Optimization
-- Enhanced meta tags (25+ keywords)
-- Open Graph & Twitter cards
-- JSON-LD structured data
-- Dynamic sitemap
-- robots.txt
-
-#### 🔐 Authentication System
-- Google OAuth Login/Register
-- Email/Password Login
-- Session management with NextAuth.js
-- User profile page
-- Navbar shows user info when logged in
-- Dropdown menu with logout
-
-## 📊 Data Structure
-
-### Interfaces Defined
-```typescript
-interface Product {
-  id, name, slug, description, price, unit, category, categorySlug,
-  origin, seller, sellerId, image, rating, reviews, sold, stock,
-  isFeatured, isOrganic, tags, moq?
-}
-
-interface Member {
-  id, name, slug, role, avatar, location, phone, email, description,
-  totalProducts, totalSales, rating, joinDate, verified, specialties
-}
-
-interface LeaderboardEntry {
-  rank, memberId, memberName, memberAvatar, memberRole, score,
-  totalSales, totalProducts, rating, trend, badge
-}
-
-interface Category {
-  id, name, slug, icon, description, productCount, image
-}
-
-interface BlogPost {
-  id, title, slug, excerpt, content, author, date, category, image, readTime
-}
-
-interface FAQ {
-  question, answer, category
-}
-```
-
-### Data Files
-- **Products**: 30 produk (kopi, rempah, buah, sayuran, ikan, sawit, herbal)
-- **Members**: 10 member (petani, penjual, distributor)
-- **Leaderboard**: 10 entry ranking
-- **Categories**: 9 kategori
-- **Blog Posts**: 5 artikel
-- **FAQs**: 8 pertanyaan
-
-### Kategori Produk
-1. 🌶️ Rempah & Bumbu (45 produk)
-2. ☕ Kopi & Teh (32 produk)
-3. 🍊 Buah-buahan (58 produk)
-4. 🥬 Sayuran (41 produk)
-5. 🫚 Lada & Merica (23 produk)
-6. 🌴 Kelapa Sawit (19 produk)
-7. 🌿 Karet & Perkebunan (15 produk)
-8. 🐟 Ikan & Perikanan (27 produk)
-9. 🪴 Obat Herbal & Tradisional (20 produk)
+### Data Snapshot (2026-09-22)
+- **Produk**: 22 (terbaru: Wood Pellet Sawit, id 22)
+- **Kategori**: 10 — termasuk 🪵 Kayu & Biomassa (baru)
+- **Bahasa**: 6 (ID + 5 lainnya via translations.ts)
+- **Foto produk**: hotlink Unsplash + lokal `public/images/products/` (wood-pellet.jpg = Wikimedia Commons, CC BY-SA)
 
 ## 🛠️ Tech Stack
 
 | Technology | Version | Purpose |
 |------------|---------|---------|
-| Next.js | 14.2.0+ | Framework |
+| Next.js | 14.2.0+ | Framework (SSG + API routes) |
 | TypeScript | 5.x | Language |
 | React | 18.3.0 | UI Library |
-| Tailwind CSS | 3.x | Styling |
-| Lucide React | 0.400.0 | Icons |
-| NextAuth.js | 4.x | Authentication |
-| Vercel | - | Deployment |
+| Tailwind CSS | 3.4.x | Styling |
+| NextAuth.js | 4.24.x | Authentication |
+| @neondatabase/serverless | 0.10.x | Postgres serverless (Neon) |
+| recharts | 2.12.x | Grafik analytics |
+| sharp + plaiceholder | - | Optimasi gambar |
+| lucide-react | 0.400.x | Icons |
 
-## 📁 File Structure
+## 🚀 Deployment & Infrastructure (setup 2026-09-22)
 
-```
-src/
-├── app/
-│   ├── page.tsx              ← Homepage
-│   ├── layout.tsx            ← Root layout
-│   ├── globals.css           ← Global styles
-│   ├── sitemap.ts            ← Dynamic sitemap
-│   ├── robots.ts             ← robots.txt
-│   ├── produk/
-│   │   ├── page.tsx          ← Products listing
-│   │   └── [slug]/page.tsx   ← Product detail
-│   ├── blog/
-│   │   ├── page.tsx          ← Blog listing
-│   │   └── [slug]/page.tsx   ← Blog post
-│   ├── faq/page.tsx          ← FAQ page
-│   ├── leaderboard/page.tsx  ← Leaderboard page
-│   ├── crm/page.tsx          ← CRM dashboard
-│   ├── autoblog/page.tsx     ← Auto blog generator
-│   ├── tentang/page.tsx      ← About page
-│   ├── kontak/page.tsx       ← Contact page
-│   ├── login/page.tsx        ← Login page (Google + Email)
-│   ├── register/page.tsx     ← Register page (Google + Manual)
-│   ├── profil/page.tsx       ← User profile page
-│   └── api/
-│       └── auth/
-│           └── [...nextauth]/route.ts ← NextAuth API
-├── components/
-│   ├── Navbar.tsx            ← Navigation (with user menu)
-│   ├── Footer.tsx            ← Footer
-│   ├── ProductCard.tsx       ← Product card
-│   ├── StatsSection.tsx      ← Stats section
-│   ├── Chatbot.tsx           ← Chatbot widget
-│   ├── SEOHead.tsx           ← SEO component
-│   └── Providers.tsx         ← NextAuth session provider
-└── lib/
-    └── data.ts               ← All data & interfaces
-```
+### Production
+- **URL**: https://komoditas-sumut.vercel.app (Vercel, project `komoditas-sumut`)
+- **Team/akun Vercel**: `ericksonsitorus53-9681` (CLI login aktif)
+- **Project linked**: `.vercel/project.json` (jangan di-commit)
 
-## 🔐 Authentication Setup
+### GitHub
+- **Repo**: `ericksonsitorus53-glitch/komoditas-website` (public)
+- **Branch**: `main` — history lengkap 13+ commit, force-pushed dari lokal 2026-09-22
+- **Remote origin**: `git@github.com:ericksonsitorus53-glitch/komoditas-website.git` (SSH)
 
-### Google OAuth Setup
-1. Buka https://console.cloud.google.com/apis/credentials
-2. Create Credentials → OAuth 2.0 Client ID
-3. Application type: Web application
-4. Authorized redirect URIs: `http://localhost:3000/api/auth/callback/google`
-5. Copy Client ID & Client Secret ke `.env.local`
+### SSH Key (dipasang via GitHub device flow, scope admin:public_key)
+- **File**: `~/.ssh/id_ed25519` (ed25519, komentar `erickson@komoditas-sumut`)
+- **Terdaftar di GitHub sebagai**: "komoditas-sumut-server (freebuff)" — key ID `164030919`, tipe Authentication Key
+- **Fingerprint**: `SHA256:NpH0b3ioUMTqVk/5S7chmzFeXe18v6ScbDuQPzuaHww`
+- ⚠️ Kalau push dari mesin ini gagal `Permission denied`: cek key terdaftar dengan fingerprint PERSIS di atas di github.com/settings/keys
 
-### Environment Variables (.env.local)
-```
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your-secret-key
-GOOGLE_CLIENT_ID=your-client-id
-GOOGLE_CLIENT_SECRET=your-client-secret
-```
+### Vercel Git Integration ✅ AKTIF
+- `vercel git connect` sudah dijalankan → repo GitHub terhubung
+- **Pipeline terverifikasi**: push `6050326` (v1.0.1) → deploy `7av405zdc` auto-trigger → Ready 45s → alias production
+- **Workflow**: `git push origin main` = live ±1 menit. Tanpa CLI.
 
-## 🔧 Configuration Files
+### Database (Neon Postgres)
+- `DATABASE_URL` wajib ada di Vercel project settings & `.env.local`
+- Schema `sales` + `achievements` auto-create idempotent saat request pertama (lihat `db.ts`)
+- Kalau DATABASE_URL kosong → API sales error jelas (bukan silent fallback)
 
-- `package.json` - Dependencies
-- `tailwind.config.ts` - Tailwind config
-- `tsconfig.json` - TypeScript config
-- `vercel.json` - Vercel deployment config
+## ⚠️ Operational Notes
 
-## 📝 Key Implementation Details
-
-### Homepage Features
-- Hero section dengan gradient & decorative elements
-- Stats section (total produk, member, transaksi)
-- Kategori grid (9 kategori)
-- Produk unggulan (6 produk featured)
-- Leaderboard preview (top 3)
-- Blog posts preview
-
-### Leaderboard Features
-- Top 3 podium display dengan crown
-- Full ranking table dengan sorting
-- Score breakdown visualization
-- Role badges (Penjual, Petani, Distributor)
-- Trend indicators (Naik, Turun, Stabil)
-- Member profile links
-- Score calculation explanation (40% Penjualan, 35% Rating, 25% Produk)
-
-### Chatbot Features
-- Auto-response untuk pertanyaan umum
-- Quick actions (Bantuan, Produk, FAQ)
-- Typing indicator
-- Responsive design
-
-### CRM Features
-- Manage pelanggan (buyer, seller, farmer)
-- Filter & search
-- Stats cards
-- Customer detail modal
-- Email blast, export, campaign
-
-### Auto Blog Features
-- AI-powered content generation
-- Topic suggestions
-- Keyword optimization
-- Status management (draft, published, scheduled)
-
-### SEO Features
-- Enhanced meta tags (25+ keywords)
-- Open Graph & Twitter cards
-- JSON-LD structured data
-- Dynamic sitemap
-- robots.txt
-
-### Styling
-- Custom color palette: primary, earth, forest
-- Utility classes: `.btn-primary`, `.btn-earth`, `.card`, `.section-title`
-- Responsive design (mobile-first)
-- Dark gradient backgrounds
-
-## 🔍 SEO Keywords
-
-### Primary Keywords
-- komoditas sumatera utara
-- kopi mandheling
-- rempah toba
-- andaliman
-
-### Secondary Keywords
-- buah segar medan
-- durian montong medan
-- jeruk medan
-- pisang barangan
-- sayuran organik karo
-- ikan mas danau toba
-- madu hutan toba
-
-### Long-tail Keywords
-- jual kopi mandheling online
-- marketplace komoditas sumatera utara
-- beli rempah toba original
-- oleh-oleh medan terbaik
-- komoditas unggulan sumatera utara
-- petani sumatera utara
+- **Revoke token classic** `ghp_X2dc...` (note: komoditas-push) di github.com/settings/tokens — sudah tidak dipakai, SSH sudah aktif
+- Device-flow token (GitHub CLI, scope admin:public_key) tidak pernah lewat chat — aman dibiarkan
+- Jangan commit `.freebuff/` dan `.vercel/`
+- Count produk di-hardcode di beberapa tempat (StatsSection, page.tsx, tentang, translations.ts ×6 bahasa) — kalau tambah produk, update semuanya
 
 ## 📋 Active Tasks
 
-- [x] Halaman Leaderboard - DONE
-- [x] Chatbot Widget - DONE
-- [x] CRM Dashboard - DONE
-- [x] Auto Blog Generator - DONE
-- [x] SEO Optimization - DONE
-- [x] Sitemap & robots.txt - DONE
-- [x] Authentication System - DONE (Google OAuth + Email/Password)
+- [x] Wood Pellet Sawit + kategori Kayu & Biomassa — DONE (2026-09-22)
+- [x] Keranjang belanja (cart-context + /keranjang) — DONE
+- [x] i18n 6 bahasa + LanguageSelector — DONE
+- [x] WebGIS peta komoditas — DONE
+- [x] Analytics + dashboard penjual + achievements — DONE
+- [x] Neon Postgres (sales & achievements) — DONE
+- [x] GitHub ↔ Vercel auto-deploy + SSH push — DONE (2026-09-22)
 - [ ] Review all pages functionality
-- [ ] Add more interactive features
 - [ ] Optimize performance
-- [ ] Implement real database
+- [ ] Perluas katalog biomassa (arang, briquette) — opsi berikutnya
 
 ---
-
-*Last Updated: 2026-08-22*
+*Last Updated: 2026-09-22*
 *Memory System: Obsidian-compatible Markdown*
