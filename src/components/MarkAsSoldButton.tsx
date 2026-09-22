@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { CheckCircle, AlertCircle, ShoppingBag, X } from 'lucide-react';
+import { recordSale } from '@/lib/achievements';
 
 interface MarkAsSoldButtonProps {
   productId: string;
@@ -45,34 +46,24 @@ export default function MarkAsSoldButton({
     setResult(null);
 
     try {
-      const res = await fetch('/api/sales', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sellerEmail,
-          sellerName,
-          productId,
-          productName,
-          productSlug,
-          category,
-          price,
-          quantity,
-          buyerName: buyerName.trim(),
-          buyerLocation: buyerLocation.trim(),
-        }),
+      // Recorded locally in the browser (localStorage) — no backend needed.
+      const { newAchievements } = recordSale({
+        sellerEmail,
+        sellerName,
+        productId,
+        productName,
+        productSlug,
+        category,
+        price,
+        quantity,
+        buyerName: buyerName.trim(),
+        buyerLocation: buyerLocation.trim(),
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setResult({ type: 'error', message: data.error || 'Gagal mencatat penjualan.' });
-        return;
-      }
 
       setResult({
         type: 'success',
         message: `Penjualan ${productName} berhasil dicatat!`,
-        newAchievements: data.newAchievements,
+        newAchievements,
       });
     } catch {
       setResult({ type: 'error', message: 'Terjadi kesalahan. Silakan coba lagi.' });

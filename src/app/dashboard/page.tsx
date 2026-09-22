@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
+import { getSellerStats } from '@/lib/achievements';
 import {
   Package, TrendingUp, Award, ShoppingBag, DollarSign,
   ChevronRight, Plus, Trophy, Star, ExternalLink
@@ -65,15 +66,18 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (session?.user?.email) {
-      fetch(`/api/sales?email=${encodeURIComponent(session.user.email)}`)
-        .then(res => res.json())
-        .then(data => {
-          setStats(data);
-          setLoading(false);
-        })
-        .catch(() => setLoading(false));
-    }
+    if (!session?.user?.email) return;
+    const email = session.user.email;
+
+    const refresh = () => {
+      setStats(getSellerStats(email));
+      setLoading(false);
+    };
+    refresh();
+
+    // Other tabs/components may record sales — stay in sync.
+    window.addEventListener('komoditasumut:sales-changed', refresh);
+    return () => window.removeEventListener('komoditasumut:sales-changed', refresh);
   }, [session]);
 
   if (status === 'loading' || loading) {

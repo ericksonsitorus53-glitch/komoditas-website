@@ -1,9 +1,11 @@
-// Achievement system for sellers
-// Sales and achievements are persisted in a Neon (Postgres) database so the
-// history survives restarts and redeploys. Achievement milestones are checked
-// against the seller's real recorded sales.
-
-import { ensureSchema, getSql } from './db';
+// Achievement system for sellers — localStorage edition.
+//
+// Sales and achievements are persisted in the browser's localStorage so the
+// dashboard and analytics work with zero backend/database setup. The public
+// API mirrors the previous Postgres-backed implementation, so callers keep
+// working; only the persistence medium changed.
+//
+// Trade-offs: data lives per browser/device and clearing site data erases it.
 
 export interface Sale {
   id: string;
@@ -30,6 +32,40 @@ export interface Achievement {
   icon: string;
   earnedAt: string;
   relatedSaleId?: string;
+}
+
+const SALES_KEY = 'komoditasumut:sales';
+const ACHIEVEMENTS_KEY = 'komoditasumut:achievements';
+
+// ------------------------------------------------------------
+// localStorage primitives (safe on server / disabled storage)
+// ------------------------------------------------------------
+
+function readStore<T>(key: string): T[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeStore<T>(key: string, value: T[]): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Storage full or disabled — fail silently like a cache miss.
+  }
+}
+
+function sameEmail(a: string, b: string): boolean {
+  return a.trim().toLowerCase() === b.trim().toLowerCase();
+}
+
+function generateId(): string {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
 
 // Achievement definitions - these are the milestones sellers can reach
@@ -120,74 +156,19 @@ export const ACHIEVEMENT_DEFINITIONS = [
   },
 ];
 
-function generateId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+/** Dispatches a browser event so open tabs refresh their data instantly. */
+function notifyChange(): void {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('komoditasumut:sales-changed'));
+  }
 }
 
 // ============================================================
-// Row <-> object mapping (columns are stored snake_case)
+// Public API - all reads/writes hit localStorage
 // ============================================================
 
-function toDateString(value: unknown): string {
-  return value instanceof Date ? value.toISOString() : String(value);
-}
-
-function toSale(row: Record<string, any>): Sale {
-  return {
-    id: row.id,
-    sellerEmail: row.seller_email,
-    sellerName: row.seller_name,
-    productId: row.product_id,
-    productName: row.product_name,
-    productSlug: row.product_slug,
-    category: row.category,
-    price: Number(row.price),
-    quantity: Number(row.quantity),
-    totalRevenue: Number(row.total_revenue),
-    buyerName: row.buyer_name,
-    buyerLocation: row.buyer_location,
-    soldAt: toDateString(row.sold_at),
-  };
-}
-
-function toAchievement(row: Record<string, any>): Achievement {
-  return {
-    id: row.id,
-    sellerEmail: row.seller_email,
-    type: row.type,
-    title: row.title,
-    description: row.description,
-    icon: row.icon,
-    earnedAt: toDateString(row.earned_at),
-    relatedSaleId: row.related_sale_id ?? undefined,
-  };
-}
-
-async function selectSalesBySeller(email: string): Promise<Sale[]> {
-  const sql = getSql();
-  const rows = await sql`
-    SELECT * FROM sales
-    WHERE LOWER(seller_email) = LOWER(${email})
-    ORDER BY sold_at ASC
-  `;
-  return rows.map(toSale);
-}
-
-async function selectAchievementsBySeller(email: string): Promise<Achievement[]> {
-  const sql = getSql();
-  const rows = await sql`
-    SELECT * FROM achievements
-    WHERE LOWER(seller_email) = LOWER(${email})
-  `;
-  return rows.map(toAchievement);
-}
-
-// ============================================================
-// Public API - all reads/writes hit Postgres
-// ============================================================
-
-/** Record a new sale and check for newly earned achievements (atomic). */
-export async function recordSale(data: {
+/** Record a new sale and check for newly earned achievements. */
+export function recordSale(data: {
   sellerEmail: string;
   sellerName: string;
   productId: string;
@@ -198,10 +179,7 @@ export async function recordSale(data: {
   quantity: number;
   buyerName: string;
   buyerLocation: string;
-}): Promise<{ sale: Sale; newAchievements: Achievement[] }> {
-  await ensureSchema();
-  const sql = getSql();
-
+}): { sale: Sale; newAchievements: Achievement[] } {
   const sale: Sale = {
     id: generateId(),
     ...data,
@@ -211,10 +189,12 @@ export async function recordSale(data: {
 
   // Snapshot the seller's state BEFORE inserting so milestone checks (which
   // use exact counts, e.g. totalSales === 5) count this sale exactly once.
-  const [existingSales, existingAchievements] = await Promise.all([
-    selectSalesBySeller(data.sellerEmail),
-    selectAchievementsBySeller(data.sellerEmail),
-  ]);
+  const existingSales = readStore<Sale>(SALES_KEY).filter(s =>
+    sameEmail(s.sellerEmail, data.sellerEmail)
+  );
+  const existingAchievements = readStore<Achievement>(ACHIEVEMENTS_KEY).filter(a =>
+    sameEmail(a.sellerEmail, data.sellerEmail)
+  );
 
   const sellerSales = [...existingSales, sale];
   const totalSales = sellerSales.length;
@@ -240,55 +220,33 @@ export async function recordSale(data: {
     }
   }
 
-  // Insert the sale and any new achievements in a single transaction so a
-  // failure can never leave a sale recorded without its achievements.
-  const insertQueries = [
-    sql`
-      INSERT INTO sales (
-        id, seller_email, seller_name, product_id, product_name, product_slug,
-        category, price, quantity, total_revenue, buyer_name, buyer_location, sold_at
-      ) VALUES (
-        ${sale.id}, ${sale.sellerEmail}, ${sale.sellerName}, ${sale.productId},
-        ${sale.productName}, ${sale.productSlug}, ${sale.category}, ${sale.price},
-        ${sale.quantity}, ${sale.totalRevenue}, ${sale.buyerName},
-        ${sale.buyerLocation}, ${sale.soldAt}
-      )
-    `,
-    ...newAchievements.map(a =>
-      sql`
-        INSERT INTO achievements (
-          id, seller_email, type, title, description, icon, earned_at, related_sale_id
-        ) VALUES (
-          ${a.id}, ${a.sellerEmail}, ${a.type}, ${a.title}, ${a.description},
-          ${a.icon}, ${a.earnedAt}, ${a.relatedSaleId ?? null}
-        )
-      `
-    ),
-  ];
-  await sql.transaction(insertQueries);
+  writeStore(SALES_KEY, [...readStore<Sale>(SALES_KEY), sale]);
+  if (newAchievements.length > 0) {
+    writeStore(ACHIEVEMENTS_KEY, [
+      ...readStore<Achievement>(ACHIEVEMENTS_KEY),
+      ...newAchievements,
+    ]);
+  }
+  notifyChange();
 
   return { sale, newAchievements };
 }
 
-export async function getSalesBySeller(email: string): Promise<Sale[]> {
-  await ensureSchema();
-  return selectSalesBySeller(email);
+export function getSalesBySeller(email: string): Sale[] {
+  return readStore<Sale>(SALES_KEY)
+    .filter(s => sameEmail(s.sellerEmail, email))
+    .sort((a, b) => new Date(a.soldAt).getTime() - new Date(b.soldAt).getTime());
 }
 
-export async function getAchievementsBySeller(email: string): Promise<Achievement[]> {
-  await ensureSchema();
-  const achievements = await selectAchievementsBySeller(email);
-  return achievements.sort(
-    (a, b) => new Date(b.earnedAt).getTime() - new Date(a.earnedAt).getTime()
-  );
+export function getAchievementsBySeller(email: string): Achievement[] {
+  return readStore<Achievement>(ACHIEVEMENTS_KEY)
+    .filter(a => sameEmail(a.sellerEmail, email))
+    .sort((a, b) => new Date(b.earnedAt).getTime() - new Date(a.earnedAt).getTime());
 }
 
-export async function getSellerStats(email: string) {
-  await ensureSchema();
-  const [sellerSales, sellerAchievements] = await Promise.all([
-    selectSalesBySeller(email),
-    selectAchievementsBySeller(email),
-  ]);
+export function getSellerStats(email: string) {
+  const sellerSales = getSalesBySeller(email);
+  const sellerAchievements = getAchievementsBySeller(email);
 
   const totalSales = sellerSales.length;
   const totalRevenue = sellerSales.reduce((sum, s) => sum + s.totalRevenue, 0);
@@ -301,23 +259,17 @@ export async function getSellerStats(email: string) {
     totalProductsSold: uniqueProducts,
     uniqueCategories,
     totalAchievements: sellerAchievements.length,
-    achievements: sellerAchievements.sort(
-      (a, b) => new Date(b.earnedAt).getTime() - new Date(a.earnedAt).getTime()
-    ),
-    recentSales: sellerSales
+    achievements: sellerAchievements,
+    recentSales: [...sellerSales]
       .sort((a, b) => new Date(b.soldAt).getTime() - new Date(a.soldAt).getTime())
       .slice(0, 10),
   };
 }
 
-export async function getAllSales(): Promise<Sale[]> {
-  await ensureSchema();
-  const sql = getSql();
-  const rows = await sql`
-    SELECT * FROM sales
-    ORDER BY sold_at ASC
-  `;
-  return rows.map(toSale);
+export function getAllSales(): Sale[] {
+  return readStore<Sale>(SALES_KEY).sort(
+    (a, b) => new Date(a.soldAt).getTime() - new Date(b.soldAt).getTime()
+  );
 }
 
 // ============================================================
@@ -473,8 +425,8 @@ function computePlatformAnalytics(all: Sale[], period: AnalyticsPeriod) {
   };
 }
 
-/** Real platform-wide analytics computed from every sale stored in Postgres. */
-export async function getPlatformAnalytics(period: AnalyticsPeriod = '6months') {
-  const all = await getAllSales();
+/** Real platform-wide analytics computed from every sale stored locally. */
+export function getPlatformAnalytics(period: AnalyticsPeriod = '6months') {
+  const all = getAllSales();
   return computePlatformAnalytics(all, period);
 }

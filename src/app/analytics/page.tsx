@@ -5,6 +5,7 @@ import {
   BarChart3, Activity, ArrowDownRight, ArrowUpRight, DollarSign,
   Package, RefreshCw, TrendingUp, Users
 } from 'lucide-react';
+import { getPlatformAnalytics } from '@/lib/achievements';
 import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart,
   ResponsiveContainer, Tooltip, XAxis, YAxis
@@ -159,12 +160,15 @@ export default function AnalyticsPage() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadData = useCallback(async (period: string) => {
+  const loadData = useCallback((period: string) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/sales?period=${period}`, { cache: 'no-store' });
-      if (!res.ok) throw new Error('Gagal memuat data');
-      const json = await res.json();
+      // Computed from sales recorded locally in this browser (localStorage).
+      const json = getPlatformAnalytics(
+        (['7days', '30days', '3months', '6months', '1year'] as const).includes(period as any)
+          ? (period as any)
+          : '6months'
+      );
       setData(json);
     } catch {
       setData(EMPTY_DATA);
