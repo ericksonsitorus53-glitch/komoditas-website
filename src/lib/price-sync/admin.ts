@@ -1,5 +1,6 @@
 // ============================================================
-// AUTH ADMIN HARGA — memakai CRON_SECRET yang sama dengan cron.
+// AUTH ADMIN HARGA — memakai ADMIN_DASHBOARD_SECRET (dipisah dari
+// CRON_SECRET cron supaya tidak satu secret untuk dua peran).
 // Perbandingan timing-safe biar gak bocor via timing attack.
 // ============================================================
 
@@ -7,7 +8,7 @@ import { timingSafeEqual } from 'crypto';
 import type { NextRequest } from 'next/server';
 
 export function isAuthorized(request: NextRequest): boolean {
-  const secret = process.env.CRON_SECRET || '';
+  const secret = process.env.ADMIN_DASHBOARD_SECRET || '';
   if (!secret) return false;
 
   // 1) Header Authorization: Bearer <secret>

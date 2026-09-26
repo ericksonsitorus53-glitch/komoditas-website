@@ -8,12 +8,12 @@ export const dynamic = 'force-dynamic';
 
 function unauthorized() {
   return NextResponse.json(
-    { status: 'error', message: 'Unauthorized — tambahkan ?key=<CRON_SECRET> atau header Authorization Bearer' },
+    { status: 'error', message: 'Unauthorized — kirim header Authorization Bearer <ADMIN_DASHBOARD_SECRET>' },
     { status: 401 }
   );
 }
 
-// GET /api/admin/price-status?key=<CRON_SECRET>
+// GET /api/admin/price-status (header Authorization: Bearer <ADMIN_DASHBOARD_SECRET>)
 // → status anchor, harga live produk, log sinkronisasi terakhir.
 export async function GET(request: NextRequest) {
   if (!isAuthorized(request)) return unauthorized();

@@ -87,7 +87,7 @@ export default function PriceAdminDashboard() {
       });
       if (res.status === 401) {
         sessionStorage.removeItem(SECRET_STORAGE_KEY);
-        throw new Error('Secret salah. Pakai CRON_SECRET yang sama dengan cron.');
+        throw new Error('Secret salah. Pakai ADMIN_DASHBOARD_SECRET (bukan CRON_SECRET).');
       }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json: StatusResponse = await res.json();
@@ -144,7 +144,7 @@ export default function PriceAdminDashboard() {
             </div>
             <div>
               <h1 className="font-display font-bold text-xl text-gray-900">Admin Harga</h1>
-              <p className="text-sm text-gray-500">Masukkan CRON_SECRET untuk melanjutkan</p>
+              <p className="text-sm text-gray-500">Masukkan ADMIN_DASHBOARD_SECRET untuk melanjutkan</p>
             </div>
           </div>
           {error && (
@@ -155,7 +155,7 @@ export default function PriceAdminDashboard() {
             value={key}
             onChange={(e) => setKey(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && key && load(key)}
-            placeholder="CRON_SECRET"
+            placeholder="ADMIN_DASHBOARD_SECRET"
             className="input-field mb-3"
             autoFocus
           />
