@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { RefreshCw, Lock, Activity, Anchor as AnchorIcon, ListChecks, AlertTriangle, CheckCircle2, Clock } from 'lucide-react';
+import { RefreshCw, Lock, Activity, Anchor as AnchorIcon, ListChecks, AlertTriangle, CheckCircle2, Clock, LogOut } from 'lucide-react';
 
 interface AnchorStatus {
   key: string;
@@ -70,7 +70,7 @@ export default function PriceAdminDashboard() {
   const [syncMsg, setSyncMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem(SECRET_STORAGE_KEY);
+    const saved = sessionStorage.getItem(SECRET_STORAGE_KEY);
     if (saved) setKey(saved);
   }, []);
 
@@ -79,13 +79,22 @@ export default function PriceAdminDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/admin/price-status?key=${encodeURIComponent(secret)}`);
-      if (res.status === 401) throw new Error('Secret salah. Pakai CRON_SECRET yang sama dengan cron.');
+      // Kirim secret via header, BUKAN query param — query URL bisa nyangkut
+      // di log request, browser history, dan proxy.
+      const res = await fetch('/api/admin/price-status', {
+        headers: { Authorization: `Bearer ${secret}` },
+        cache: 'no-store',
+      });
+      if (res.status === 401) {
+        sessionStorage.removeItem(SECRET_STORAGE_KEY);
+        throw new Error('Secret salah. Pakai CRON_SECRET yang sama dengan cron.');
+      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json: StatusResponse = await res.json();
       if (json.status !== 'ok') throw new Error('Respons tidak valid');
       setData(json);
-      localStorage.setItem(SECRET_STORAGE_KEY, secret);
+      // Simpan di sessionStorage (bukan localStorage) — otomatis hilang saat tab ditutup.
+      sessionStorage.setItem(SECRET_STORAGE_KEY, secret);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Gagal memuat status');
       setData(null);
@@ -97,6 +106,13 @@ export default function PriceAdminDashboard() {
   useEffect(() => {
     if (key) load(key);
   }, [key, load]);
+
+  const logout = () => {
+    sessionStorage.removeItem(SECRET_STORAGE_KEY);
+    setKey('');
+    setData(null);
+    setError(null);
+  };
 
   const runManualSync = async () => {
     if (!key || syncing) return;
@@ -176,6 +192,9 @@ export default function PriceAdminDashboard() {
               </p>
             </div>
             <div className="flex gap-2">
+              <button onClick={logout} className="btn-secondary text-sm text-red-600 border-red-200 hover:bg-red-50">
+                <LogOut className="w-4 h-4 mr-1 inline" /> Keluar
+              </button>
               <button onClick={() => key && load(key)} disabled={loading} className="btn-secondary text-sm">
                 <RefreshCw className={`w-4 h-4 mr-1 inline ${loading ? 'animate-spin' : ''}`} /> Muat Ulang
               </button>
