@@ -41,7 +41,8 @@ Platform marketplace komoditas pertanian, perkebunan, perikanan, dan biomassa Su
 | `/api/auth/forgot-password` | Kirim permintaan reset password |
 | `/api/auth/reset-password` | Reset password |
 | `/api/register` | Registrasi user |
-| `/api/sales` | CRUD penjualan (Neon Postgres) |
+
+*(Route `/api/sales` sudah dihapus — data penjualan kini di localStorage, lihat Lib)*
 
 ### Components (utama)
 | Component | Purpose |
@@ -59,10 +60,9 @@ Platform marketplace komoditas pertanian, perkebunan, perikanan, dan biomassa Su
 | File | Purpose |
 |------|---------|
 | `data.ts` | 22 produk, 10 kategori, siteStats |
-| `db.ts` | Koneksi Neon Postgres (lazy) + schema sales/achievements |
 | `cart-context.tsx` | State keranjang belanja |
 | `i18n-context.tsx` + `languages.ts` + `translations.ts` | Sistem i18n 6 bahasa (828 baris) |
-| `achievements.ts` | Logika pencapaian penjual |
+| `achievements.ts` | **Storage penjualan & pencapaian via localStorage** — API sama dulu (recordSale, getSellerStats, getPlatformAnalytics), tanpa backend. Cross-tab sync via event `komoditasumut:sales-changed` |
 | `blur-images.ts` | Blur placeholder per produk (warna dominan) |
 
 ### Data Snapshot (2026-09-22)
@@ -79,7 +79,6 @@ Platform marketplace komoditas pertanian, perkebunan, perikanan, dan biomassa Su
 | React | 18.3.0 | UI Library |
 | Tailwind CSS | 3.4.x | Styling |
 | NextAuth.js | 4.24.x | Authentication |
-| @neondatabase/serverless | 0.10.x | Postgres serverless (Neon) |
 | recharts | 2.12.x | Grafik analytics |
 | sharp + plaiceholder | - | Optimasi gambar |
 | lucide-react | 0.400.x | Icons |
@@ -107,10 +106,10 @@ Platform marketplace komoditas pertanian, perkebunan, perikanan, dan biomassa Su
 - **Pipeline terverifikasi**: push `6050326` (v1.0.1) → deploy `7av405zdc` auto-trigger → Ready 45s → alias production
 - **Workflow**: `git push origin main` = live ±1 menit. Tanpa CLI.
 
-### Database (Neon Postgres)
-- `DATABASE_URL` wajib ada di Vercel project settings & `.env.local`
-- Schema `sales` + `achievements` auto-create idempotent saat request pertama (lihat `db.ts`)
-- Kalau DATABASE_URL kosong → API sales error jelas (bukan silent fallback)
+### Data Penjualan (localStorage — sejak 2026-09-22)
+- **Tidak ada database** — penjualan & pencapaian tersimpan di `localStorage` browser (keys: `komoditasumut:sales`, `komoditasumut:achievements`)
+- API `achievements.ts` tetap sama seperti versi Postgres → ganti storage balik ke DB cukup ubah 1 file
+- ⚠️ Data per browser/device; clear site data = data hilang; tidak untuk multi-penjual lintas perangkat
 
 ## ⚠️ Operational Notes
 
@@ -126,7 +125,7 @@ Platform marketplace komoditas pertanian, perkebunan, perikanan, dan biomassa Su
 - [x] i18n 6 bahasa + LanguageSelector — DONE
 - [x] WebGIS peta komoditas — DONE
 - [x] Analytics + dashboard penjual + achievements — DONE
-- [x] Neon Postgres (sales & achievements) — DONE
+- [x] Neon Postgres (sales & achievements) — DIBATALKAN, diganti localStorage (2026-09-22)
 - [x] GitHub ↔ Vercel auto-deploy + SSH push — DONE (2026-09-22)
 - [ ] Review all pages functionality
 - [ ] Optimize performance

@@ -74,3 +74,5 @@ ttf/
 otf/
 woff/
 woff2/
+.env*
+.freebuff/

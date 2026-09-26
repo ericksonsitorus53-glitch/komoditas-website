@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, CreditCard, Truck, CheckCircle2 } from 'lucide-react';
 import { useCart } from '@/lib/cart-context';
+import { useLivePrices } from '@/hooks/useLivePrices';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -15,7 +16,15 @@ function formatPrice(price: number): string {
 }
 
 export default function CartPage() {
-  const { items, removeItem, updateQuantity, clearCart, totalItems, totalPrice } = useCart();
+  const { items, removeItem, updateQuantity, clearCart, totalItems } = useCart();
+  const { prices } = useLivePrices();
+
+  // Harga live mengikuti pasar (fallback: harga saat item masuk keranjang)
+  const liveItems = items.map((item) => ({
+    ...item,
+    livePrice: prices[item.product.slug]?.livePrice ?? item.product.price,
+  }));
+  const liveTotal = liveItems.reduce((sum, item) => sum + item.livePrice * item.quantity, 0);
   const [checkoutStep, setCheckoutStep] = useState<'cart' | 'shipping' | 'payment' | 'success'>('cart');
   const [shippingInfo, setShippingInfo] = useState({
     name: '',
@@ -26,8 +35,8 @@ export default function CartPage() {
     notes: '',
   });
 
-  const shippingCost = totalPrice > 500000 ? 0 : 50000;
-  const grandTotal = totalPrice + shippingCost;
+  const shippingCost = liveTotal > 500000 ? 0 : 50000;
+  const grandTotal = liveTotal + shippingCost;
 
   const handleCheckout = () => {
     // In a real app, this would process the order
@@ -129,7 +138,7 @@ export default function CartPage() {
                         <h3 className="font-semibold text-gray-900 truncate">{item.product.name}</h3>
                         <p className="text-sm text-gray-500">{item.product.origin}</p>
                         <p className="text-sm text-primary-600 font-medium mt-1">
-                          {formatPrice(item.product.price)} / {item.product.unit}
+                          {formatPrice(liveItems.find((li) => li.product.id === item.product.id)?.livePrice ?? item.product.price)} / {item.product.unit}
                         </p>
                       </div>
                       <div className="flex flex-col items-end justify-between">
@@ -155,7 +164,7 @@ export default function CartPage() {
                           </button>
                         </div>
                         <p className="font-semibold text-gray-900">
-                          {formatPrice(item.product.price * item.quantity)}
+                          {formatPrice((liveItems.find((li) => li.product.id === item.product.id)?.livePrice ?? item.product.price) * item.quantity)}
                         </p>
                       </div>
                     </div>
@@ -301,17 +310,17 @@ export default function CartPage() {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24">
               <h2 className="font-semibold text-gray-900 mb-4">Ringkasan Pesanan</h2>
               <div className="space-y-3 mb-4">
-                {items.map((item) => (
+                {liveItems.map((item) => (
                   <div key={item.product.id} className="flex justify-between text-sm">
                     <span className="text-gray-600 truncate mr-2">{item.product.name} x{item.quantity}</span>
-                    <span className="font-medium text-gray-900">{formatPrice(item.product.price * item.quantity)}</span>
+                    <span className="font-medium text-gray-900">{formatPrice(item.livePrice * item.quantity)}</span>
                   </div>
                 ))}
               </div>
               <div className="border-t border-gray-100 pt-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Subtotal</span>
-                  <span className="font-medium">{formatPrice(totalPrice)}</span>
+                  <span className="font-medium">{formatPrice(liveTotal)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Ongkos Kirim</span>

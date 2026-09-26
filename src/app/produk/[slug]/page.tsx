@@ -1,12 +1,13 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { MapPin, ShoppingCart, Heart, Share2, ChevronRight, Store, Shield, Truck, RotateCcw, Leaf, Minus, Plus } from 'lucide-react';
+import { MapPin, Heart, Share2, ChevronRight, Store, Shield, Truck, RotateCcw, Leaf, Minus, Plus } from 'lucide-react';
 import { products } from '@/lib/data';
 import ProductCard from '@/components/ProductCard';
 import ProductImage from '@/components/ProductImage';
 import MarkAsSoldButton from '@/components/MarkAsSoldButton';
 import { getProductBlurData } from '@/lib/blur-images';
 import { ProductJsonLd, BreadcrumbJsonLd } from '@/components/JsonLd';
+import { LiveProductPrice, WaOrderButtons } from '@/components/ProductPrice';
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat('id-ID', {
@@ -137,12 +138,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
               <h1 className="font-display font-bold text-2xl text-gray-900">{product.name}</h1>
 
-              {/* Price */}
-              <div className="mt-6 p-4 bg-primary-50 rounded-xl">
-                <div className="text-sm text-primary-600 font-medium">Harga</div>
-                <div className="text-3xl font-bold text-primary-700">{formatPrice(product.price)}</div>
-                <div className="text-sm text-primary-600">per {product.unit}</div>
-              </div>
+              {/* Price (live via sumber resmi, fallback katalog) */}
+              <LiveProductPrice product={product} />
 
               {/* Stock */}
               <div className="mt-4 flex items-center justify-between">
@@ -167,24 +164,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               </div>
 
               {/* Actions */}
-              <div className="mt-6 flex gap-3">
-                <a
-                  href={`https://wa.me/6285377018574?text=${encodeURIComponent(`Halo, saya ingin membeli ${product.name}\nHarga: ${formatPrice(product.price)}/${product.unit}\n\nMohon info stok dan cara pemesanan. Terima kasih.`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-primary flex-1 text-center"
-                >
-                  <ShoppingCart className="w-5 h-5 mr-2 inline" /> Keranjang
-                </a>
-                <a
-                  href={`https://wa.me/6285377018574?text=${encodeURIComponent(`Halo, saya ingin membeli ${product.name}\nHarga: ${formatPrice(product.price)}/${product.unit}\n\nMohon info stok dan cara pemesanan. Terima kasih.`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-earth flex-1 text-center"
-                >
-                  Beli Sekarang
-                </a>
-              </div>
+              <WaOrderButtons product={product} />
 
               {/* Mark as Sold - Only visible to logged-in sellers */}
               <MarkAsSoldButton

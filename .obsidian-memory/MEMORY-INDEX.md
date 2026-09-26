@@ -73,7 +73,7 @@
 | Pages | 15+ |
 | Components | 8+ |
 | Languages | 6 |
-| API Routes | 5 |
+| API Routes | 4 |
 
 ---
 
@@ -95,7 +95,7 @@
 | Remote | `git@github.com:ericksonsitorus53-glitch/komoditas-website.git` (SSH) |
 | Deploy | **Auto**: push ke main = live ±1 menit (Vercel Git integration) |
 | SSH key | `~/.ssh/id_ed25519` — fp `SHA256:NpH0b3ioUMTqVk/5S7chmzFeXe18v6ScbDuQPzuaHww` |
-| DB | Neon Postgres via `DATABASE_URL` |
+| Data penjualan | localStorage browser — tanpa DB (`komoditasumut:sales`) |
 
 ---
 

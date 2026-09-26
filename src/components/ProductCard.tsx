@@ -7,6 +7,8 @@ import { MapPin, ShoppingCart, Leaf, TrendingUp, Plus } from 'lucide-react';
 import type { Product } from '@/lib/data';
 import ProductCardSkeleton from './ProductCardSkeleton';
 import { useCart } from '@/lib/cart-context';
+import LivePriceTag from './LivePriceTag';
+import { useLivePrices } from '@/hooks/useLivePrices';
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat('id-ID', {
@@ -25,6 +27,12 @@ export default function ProductCard({
 }) {
   const [isLoading, setIsLoading] = useState(true);
   const { addItem } = useCart();
+  const { prices } = useLivePrices();
+
+  // Harga live dari sumber resmi (fallback: harga katalog)
+  const currentPrice = prices[product.slug]?.livePrice ?? product.price;
+
+  const waHref = `https://wa.me/6285377018574?text=${encodeURIComponent(`Halo, saya ingin membeli ${product.name}\nHarga: ${formatPrice(currentPrice)}/${product.unit}\n\nMohon info stok dan cara pemesanan. Terima kasih.`)}`;
 
   if (isLoading) {
     return (
@@ -88,7 +96,7 @@ export default function ProductCard({
             <Plus className="w-5 h-5" />
           </button>
           <a
-            href={`https://wa.me/6285377018574?text=${encodeURIComponent(`Halo, saya ingin membeli ${product.name}\nHarga: ${formatPrice(product.price)}/${product.unit}\n\nMohon info stok dan cara pemesanan. Terima kasih.`)}`}
+            href={waHref}
             target="_blank"
             rel="noopener noreferrer"
             className="w-10 h-10 bg-green-500 rounded-xl shadow-lg flex items-center justify-center text-white hover:bg-green-600 transition-all"
@@ -116,11 +124,10 @@ export default function ProductCard({
 
         <div className="flex items-center justify-between mt-3">
           <div>
-            <span className="text-lg font-bold text-primary-600">{formatPrice(product.price)}</span>
-            <span className="text-xs text-gray-400 ml-1">/ {product.unit}</span>
+            <LivePriceTag product={product} />
           </div>
           <a
-            href={`https://wa.me/6285377018574?text=${encodeURIComponent(`Halo, saya ingin membeli ${product.name}\nHarga: ${formatPrice(product.price)}/${product.unit}\n\nMohon info stok dan cara pemesanan. Terima kasih.`)}`}
+            href={waHref}
             target="_blank"
             rel="noopener noreferrer"
             className="w-9 h-9 bg-green-500 rounded-lg flex items-center justify-center text-white hover:bg-green-600 transition-all shadow-sm"
